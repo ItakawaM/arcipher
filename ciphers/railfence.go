@@ -1,5 +1,9 @@
 package ciphers
 
+import (
+	"os"
+)
+
 func reverseString(s string) string {
 	reversed := []rune(s)
 	for i, j := 0, len(reversed)-1; i < j; i, j = i+1, j-1 {
@@ -42,4 +46,32 @@ func RailFenceEncryptMessage(message string, key int) string {
 
 func RailFenceDecryptMessage(encrypted string, key int) string {
 	panic("Not Implemented!")
+}
+
+func RailFenceEncryptFile(file string, key int) error {
+	data, err := os.ReadFile(file)
+	if err != nil {
+		return err
+	}
+
+	if key == 1 {
+		return os.WriteFile(file+"_fenced", data, 0644)
+	}
+
+	fileSize := len(data)
+	encrypted := make([]byte, 0, fileSize)
+	cycle := 2 * (key - 1)
+
+	for level := key - 1; level >= 0; level-- {
+		for charIndex := level; charIndex < fileSize; charIndex += cycle {
+			encrypted = append(encrypted, data[charIndex])
+
+			secondCharIndex := charIndex + cycle - 2*level
+			if level != 0 && level != key-1 && secondCharIndex < fileSize {
+				encrypted = append(encrypted, data[secondCharIndex])
+			}
+		}
+	}
+
+	return os.WriteFile(file+"_fenced", encrypted, 0644)
 }

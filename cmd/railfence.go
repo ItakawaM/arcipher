@@ -1,16 +1,20 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
+	"strings"
+	"time"
 
 	ciphers "github.com/ItakawaM/go-cryptotool/ciphers"
 	"github.com/spf13/cobra"
 )
 
 var (
-	message string
-	key     int
+	message  string
+	filename string
+	key      int
 )
 
 // railfenceCmd represents the railfence command
@@ -26,8 +30,21 @@ var encryptCmd = &cobra.Command{
 	Short: "Encrypt a given message with a key",
 	Long:  `Description WIP`, // TODO: Description
 	Run: func(cmd *cobra.Command, args []string) {
-		if message == "" {
-			fmt.Println("Please provide a message to encrypt!")
+		startTime := time.Now()
+
+		stat, _ := os.Stdin.Stat()
+		if message == "" && filename == "" && (stat.Mode()&os.ModeCharDevice) == 0 {
+			scanner := bufio.NewScanner(os.Stdin)
+			var builder strings.Builder
+			for scanner.Scan() {
+				builder.WriteString(scanner.Text())
+			}
+
+			message = builder.String()
+		}
+
+		if message == "" && filename == "" {
+			fmt.Println("Please provide an input to encrypt!")
 			os.Exit(1)
 		}
 
@@ -36,8 +53,18 @@ var encryptCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		encryptedMessage := ciphers.RailFenceEncryptMessage(message, key)
-		fmt.Println(encryptedMessage)
+		if message != "" {
+			encryptedMessage := ciphers.RailFenceEncryptMessage(message, key)
+			fmt.Println(encryptedMessage)
+		} else {
+			if err := ciphers.RailFenceEncryptFile(filename, key); err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+
+		elapsed := time.Since(startTime)
+		fmt.Printf("Encrypting Took: %s", elapsed)
 	},
 }
 
@@ -46,8 +73,10 @@ func init() {
 	railfenceCmd.AddCommand(encryptCmd)
 
 	encryptCmd.Flags().StringVarP(&message, "message", "m", "", "Message to encrypt")
+	encryptCmd.Flags().StringVarP(&filename, "file", "f", "", "File to encrypt")
 	encryptCmd.Flags().IntVarP(&key, "key", "k", 0, "Key to use")
 
-	encryptCmd.MarkFlagRequired("cipher")
 	encryptCmd.MarkFlagRequired("key")
+
+	encryptCmd.MarkFlagsMutuallyExclusive("file", "message")
 }
