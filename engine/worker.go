@@ -22,7 +22,7 @@ func NewJob(offset int64, size int64) Job {
 	return Job{Offset: offset, Size: size}
 }
 
-func Worker(mode string, blockCipher ciphers.BlockCipher, inFile *os.File, outfile *os.File, jobs <-chan Job, waitGroup *sync.WaitGroup, buffer []byte) {
+func Worker(mode ciphers.Mode, blockCipher ciphers.BlockCipher, inFile *os.File, outfile *os.File, jobs <-chan Job, waitGroup *sync.WaitGroup, buffer []byte) {
 	defer waitGroup.Done()
 
 	for job := range jobs {
@@ -33,12 +33,12 @@ func Worker(mode string, blockCipher ciphers.BlockCipher, inFile *os.File, outfi
 		}
 
 		switch mode {
-		case "encrypt":
+		case ciphers.Encrypt:
 			if err := blockCipher.EncryptBlock(readBuffer); err != nil {
 				log.Fatalln("Encrypting block error: ", err)
 			}
 
-		case "decrypt":
+		case ciphers.Decrypt:
 			if err := blockCipher.DecryptBlock(readBuffer); err != nil {
 				log.Fatalln("Decrypting block error: ", err)
 			}

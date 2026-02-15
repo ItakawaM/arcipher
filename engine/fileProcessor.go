@@ -9,7 +9,7 @@ import (
 	"github.com/ItakawaM/go-cryptotool/ciphers"
 )
 
-func ProcessFile(mode string, inFilePath, outFilePath string, blockCipher ciphers.BlockCipher) error {
+func ProcessFile(mode ciphers.Mode, inFilePath, outFilePath string, blockCipher ciphers.BlockCipher) error {
 	inFile, err := os.Open(inFilePath)
 	if err != nil {
 		return err
@@ -40,12 +40,12 @@ func ProcessFile(mode string, inFilePath, outFilePath string, blockCipher cipher
 		}
 
 		switch mode {
-		case "encrypt":
+		case ciphers.Encrypt:
 			if err := blockCipher.EncryptBlock(buffer); err != nil {
 				return err
 			}
 
-		case "decrypt":
+		case ciphers.Decrypt:
 			if err := blockCipher.DecryptBlock(buffer); err != nil {
 				return err
 			}
