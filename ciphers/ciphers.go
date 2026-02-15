@@ -17,6 +17,6 @@ func ModeToString(mode Mode) string {
 }
 
 type BlockCipher interface {
-	EncryptBlock([]byte) error
-	DecryptBlock([]byte) error
+	EncryptBlock([]byte, []byte) error
+	DecryptBlock([]byte, []byte) error
 }

@@ -34,24 +34,26 @@ func ProcessFile(mode ciphers.Mode, inFilePath, outFilePath string, blockCipher 
 
 	// For small files
 	if fileSize < ciphers.DefaultBlockSize {
+		readBuffer := make([]byte, fileSize)
 		buffer := make([]byte, fileSize)
-		if _, err := inFile.Read(buffer); err != nil && err != io.EOF {
+
+		if _, err := inFile.Read(readBuffer); err != nil && err != io.EOF {
 			return err
 		}
 
 		switch mode {
 		case ciphers.Encrypt:
-			if err := blockCipher.EncryptBlock(buffer); err != nil {
+			if err := blockCipher.EncryptBlock(readBuffer, buffer); err != nil {
 				return err
 			}
 
 		case ciphers.Decrypt:
-			if err := blockCipher.DecryptBlock(buffer); err != nil {
+			if err := blockCipher.DecryptBlock(readBuffer, buffer); err != nil {
 				return err
 			}
 		}
 
-		_, err := outFile.WriteAt(buffer, 0)
+		_, err := outFile.WriteAt(readBuffer, 0)
 		return err
 	}
 

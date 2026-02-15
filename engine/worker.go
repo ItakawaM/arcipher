@@ -34,12 +34,12 @@ func Worker(mode ciphers.Mode, blockCipher ciphers.BlockCipher, inFile *os.File,
 
 		switch mode {
 		case ciphers.Encrypt:
-			if err := blockCipher.EncryptBlock(readBuffer); err != nil {
+			if err := blockCipher.EncryptBlock(readBuffer, buffer); err != nil {
 				log.Fatalln("Encrypting block error: ", err)
 			}
 
 		case ciphers.Decrypt:
-			if err := blockCipher.DecryptBlock(readBuffer); err != nil {
+			if err := blockCipher.DecryptBlock(readBuffer, buffer); err != nil {
 				log.Fatalln("Decrypting block error: ", err)
 			}
 		}

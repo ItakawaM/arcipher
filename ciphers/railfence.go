@@ -8,35 +8,34 @@ func NewRailFenceCipher(key int) *RailFenceCipher {
 	return &RailFenceCipher{Key: key}
 }
 
-func (rfCipher *RailFenceCipher) EncryptBlock(block []byte) error {
+func (rfCipher *RailFenceCipher) EncryptBlock(block []byte, buffer []byte) error {
 	if rfCipher.Key <= 1 {
 		return nil
 	}
 
 	cycle := 2 * (rfCipher.Key - 1)
 	blockSize := len(block)
-	result := make([]byte, blockSize)
 
 	index := 0
 	for rail := rfCipher.Key - 1; rail >= 0; rail-- {
 		for blockIndex := rail; blockIndex < blockSize; blockIndex += cycle {
-			result[index] = block[blockIndex]
+			buffer[index] = block[blockIndex]
 			index += 1
 
 			// if middle rail
 			secondBlockIndex := blockIndex + cycle - 2*rail
 			if rail != 0 && rail != rfCipher.Key-1 && secondBlockIndex < blockSize {
-				result[index] = block[secondBlockIndex]
+				buffer[index] = block[secondBlockIndex]
 				index += 1
 			}
 		}
 	}
 
-	copy(block, result)
+	copy(block, buffer)
 	return nil
 }
 
-func (rfCipher *RailFenceCipher) DecryptBlock(block []byte) error {
+func (rfCipher *RailFenceCipher) DecryptBlock(block []byte, buffer []byte) error {
 	if rfCipher.Key <= 1 || len(block) == 0 {
 		return nil
 	}
@@ -61,15 +60,13 @@ func (rfCipher *RailFenceCipher) DecryptBlock(block []byte) error {
 		}
 	}
 
-	result := make([]byte, blockSize)
-
 	usedInRail := make([]int, rfCipher.Key)
 	currentRail := 0
 	direction := 1
 
 	for index := range blockSize {
 		blockIndex := railOffset[currentRail] + usedInRail[currentRail]
-		result[index] = block[blockIndex]
+		buffer[index] = block[blockIndex]
 		usedInRail[currentRail] += 1
 
 		switch currentRail {
@@ -82,6 +79,6 @@ func (rfCipher *RailFenceCipher) DecryptBlock(block []byte) error {
 		currentRail += direction
 	}
 
-	copy(block, result)
+	copy(block, buffer)
 	return nil
 }

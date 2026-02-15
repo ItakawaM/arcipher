@@ -46,13 +46,14 @@ func railfenceRunE(mode ciphers.Mode) error {
 	railFenceCipher := ciphers.NewRailFenceCipher(key)
 	if message != "" {
 		bytes := []byte(message)
+		buffer := make([]byte, len(bytes))
 
 		var err error
 		switch mode {
 		case ciphers.Encrypt:
-			err = railFenceCipher.EncryptBlock(bytes)
+			err = railFenceCipher.EncryptBlock(bytes, buffer)
 		case ciphers.Decrypt:
-			err = railFenceCipher.DecryptBlock(bytes)
+			err = railFenceCipher.DecryptBlock(bytes, buffer)
 		}
 		if err != nil {
 			return err
