@@ -9,7 +9,9 @@ import (
 	"github.com/ItakawaM/go-cryptotool/ciphers"
 )
 
-func ProcessFile(mode ciphers.Mode, inFilePath, outFilePath string, blockCipher ciphers.BlockCipher) error {
+func ProcessFile(mode ciphers.Mode, inFilePath, outFilePath string, blockCipher ciphers.BlockCipher, blockSize int64) error {
+	blockSize *= ciphers.KB
+
 	inFile, err := os.Open(inFilePath)
 	if err != nil {
 		return err
@@ -33,7 +35,7 @@ func ProcessFile(mode ciphers.Mode, inFilePath, outFilePath string, blockCipher 
 	}
 
 	// For small files
-	if fileSize < ciphers.DefaultBlockSize {
+	if fileSize < blockSize {
 		readBuffer := make([]byte, fileSize)
 		buffer := make([]byte, fileSize)
 
@@ -63,7 +65,7 @@ func ProcessFile(mode ciphers.Mode, inFilePath, outFilePath string, blockCipher 
 
 	buffers := make([][]byte, numWorkers)
 	for i := range numWorkers {
-		buffers[i] = make([]byte, ciphers.DefaultBlockSize)
+		buffers[i] = make([]byte, blockSize)
 	}
 
 	for i := range numWorkers {
@@ -71,9 +73,9 @@ func ProcessFile(mode ciphers.Mode, inFilePath, outFilePath string, blockCipher 
 		go Worker(mode, blockCipher, inFile, outFile, jobs, &waitGroup, buffers[i])
 	}
 
-	for offset := int64(0); offset < fileSize; offset += ciphers.DefaultBlockSize {
-		size := ciphers.DefaultBlockSize
-		if offset+ciphers.DefaultBlockSize > fileSize {
+	for offset := int64(0); offset < fileSize; offset += blockSize {
+		size := blockSize
+		if offset+blockSize > fileSize {
 			size = fileSize - offset
 		}
 

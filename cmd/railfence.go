@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/ItakawaM/go-cryptotool/benchmark"
 	"github.com/ItakawaM/go-cryptotool/ciphers"
@@ -15,7 +16,8 @@ var (
 	inputFilePath  string
 	outputFilePath string
 	key            int
-	blocksize      int
+	blockSize      int
+	allowedBlock   = []int{16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384}
 )
 
 func addFlags(command *cobra.Command, mode string) {
@@ -23,15 +25,21 @@ func addFlags(command *cobra.Command, mode string) {
 	command.Flags().StringVarP(&inputFilePath, "input", "i", "", fmt.Sprintf("Path to file to %s", mode))
 	command.Flags().StringVarP(&outputFilePath, "output", "o", "", "Path to output file")
 	command.Flags().IntVarP(&key, "key", "k", 1, "Cipher algorithm key")
+	command.Flags().IntVarP(&blockSize, "block", "b", 64, "Block size (KB): 16 32 64 128 256 512 1024 2048 4096 8192 16384")
 
 	command.MarkFlagRequired("key")
 	command.MarkFlagsRequiredTogether("input", "output")
 	command.MarkFlagsMutuallyExclusive("message", "input")
+	command.MarkFlagsMutuallyExclusive("message", "block")
 }
 
 func railfencePreRunE() error {
 	if key < 1 {
 		return fmt.Errorf("provided --key must be >=1")
+	}
+
+	if !slices.Contains(allowedBlock, blockSize) {
+		return fmt.Errorf("Provided block size[%d] is not viable!", blockSize)
 	}
 
 	return nil
@@ -61,7 +69,7 @@ func railfenceRunE(mode ciphers.Mode) error {
 
 		fmt.Println(string(bytes))
 	} else {
-		err := engine.ProcessFile(mode, inputFilePath, outputFilePath, railFenceCipher)
+		err := engine.ProcessFile(mode, inputFilePath, outputFilePath, railFenceCipher, int64(blockSize))
 		if err != nil {
 			return err
 		}

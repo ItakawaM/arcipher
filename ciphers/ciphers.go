@@ -1,6 +1,6 @@
 package ciphers
 
-const DefaultBlockSize int64 = 4 * 1024 * 1024
+const KB = 1024
 
 type Mode int
 
