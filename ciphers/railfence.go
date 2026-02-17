@@ -43,7 +43,7 @@ func (rfCipher *RailFenceCipher) BuildPermutationTable() {
 		// Reverse order when Key >= BlockSize
 	} else if rfCipher.Key >= rfCipher.BlockSize {
 		// Blocks are always even numbers
-		for index := 0; index < rfCipher.BlockSize/2; index++ {
+		for index := 0; index < rfCipher.BlockSize; index++ {
 			rfCipher.PermutationTable[index] = rfCipher.BlockSize - 1 - index
 			rfCipher.InverseTable[rfCipher.BlockSize-1-index] = index
 		}
@@ -88,6 +88,7 @@ func (rfCipher *RailFenceCipher) BuildPermutationTable() {
 
 func (rfCipher *RailFenceCipher) EncryptBlock(dst []byte, src []byte) error {
 	if rfCipher.Key <= 1 {
+		copy(dst, src)
 		return nil
 	}
 
@@ -100,6 +101,7 @@ func (rfCipher *RailFenceCipher) EncryptBlock(dst []byte, src []byte) error {
 
 func (rfCipher *RailFenceCipher) DecryptBlock(dst []byte, src []byte) error {
 	if rfCipher.Key <= 1 {
+		copy(dst, src)
 		return nil
 	}
 
