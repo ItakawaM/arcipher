@@ -1,5 +1,7 @@
 package ciphers
 
+import "fmt"
+
 type RailFenceCipher struct {
 	Key              int
 	BlockSize        int
@@ -83,6 +85,36 @@ func (rfCipher *RailFenceCipher) BuildPermutationTable() {
 		rfCipher.PermutationTable[index] = railOffset[rails[index]]
 		rfCipher.InverseTable[railOffset[rails[index]]] = index
 		railOffset[rails[index]]++
+	}
+}
+
+func (rfCipher *RailFenceCipher) Visualize(message string) {
+	if rfCipher.Key <= 1 {
+		fmt.Println(message)
+		return
+	}
+
+	cycle := 2 * (rfCipher.Key - 1)
+
+	rails := make([]int, rfCipher.BlockSize)
+	for index := 0; index < rfCipher.BlockSize; index++ {
+		cyclePosition := index % cycle
+		if cyclePosition < rfCipher.Key {
+			rails[index] = cyclePosition
+		} else {
+			rails[index] = cycle - cyclePosition
+		}
+	}
+
+	for rail := min(rfCipher.Key, rfCipher.BlockSize) - 1; rail >= 0; rail-- {
+		for index := 0; index < rfCipher.BlockSize; index++ {
+			if rails[index] == rail {
+				fmt.Printf("%s ", string(message[index]))
+			} else {
+				fmt.Print(". ")
+			}
+		}
+		fmt.Println("")
 	}
 }
 
