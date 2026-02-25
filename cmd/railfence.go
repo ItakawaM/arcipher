@@ -12,15 +12,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type railFenceParams struct {
+type RailFenceParams struct {
 	key      int
 	isVisual bool
-	blockCipherParams
-}
-
-var allowedBlockSizes = []int{
-	16, 32, 64, 128, 256, 512,
-	1024, 2048, 4096, 8192, 16384,
+	BlockCipherParams
 }
 
 func NewRailFenceCommand() *cobra.Command {
@@ -41,7 +36,7 @@ using a specified number of rails (key).
 }
 
 func newRailFenceEncryptCommand() *cobra.Command {
-	params := &railFenceParams{}
+	params := &RailFenceParams{}
 
 	encryptCmd := &cobra.Command{
 		Use:   "encrypt <key> <message | input> [output]",
@@ -77,15 +72,14 @@ Notes:
 			return railfencePreRunE(cmd, params, args)
 		},
 	}
-
-	addFlags(encryptCmd, &params.blockCipherParams)
+	addFlags(encryptCmd, &params.BlockCipherParams)
 	encryptCmd.Flags().BoolVarP(&params.isVisual, "print", "p", false, "Print zigzag visualization (text mode only)")
 
 	return encryptCmd
 }
 
 func newRailFenceDecryptCommand() *cobra.Command {
-	params := &railFenceParams{}
+	params := &RailFenceParams{}
 
 	decryptCmd := &cobra.Command{
 		Use:   "decrypt <key> <message | input> [output]",
@@ -114,13 +108,12 @@ Notes:
 			return railfencePreRunE(cmd, params, args)
 		},
 	}
-
-	addFlags(decryptCmd, &params.blockCipherParams)
+	addFlags(decryptCmd, &params.BlockCipherParams)
 
 	return decryptCmd
 }
 
-func railfencePreRunE(command *cobra.Command, params *railFenceParams, args []string) error {
+func railfencePreRunE(command *cobra.Command, params *RailFenceParams, args []string) error {
 	key, err := strconv.Atoi(args[0])
 	if err != nil || key < 1 {
 		return fmt.Errorf("key must be >= 1")
@@ -153,7 +146,7 @@ func railfencePreRunE(command *cobra.Command, params *railFenceParams, args []st
 }
 
 // Logic
-func railfenceRunE(mode ciphers.Mode, params *railFenceParams, args []string) error {
+func railfenceRunE(mode ciphers.Mode, params *RailFenceParams, args []string) error {
 	if isVerbose {
 		defer benchmark.MeasurePerformance(fmt.Sprintf("railfence %s", mode))()
 	}
@@ -161,8 +154,10 @@ func railfenceRunE(mode ciphers.Mode, params *railFenceParams, args []string) er
 	if len(args) == 2 {
 		message := args[1]
 
-		railFenceCipher := ciphers.NewRailFenceCipher(params.key, len(message), 1)
-		railFenceCipher.BuildPermutationTable()
+		railFenceCipher, railFenceErr := ciphers.NewRailFenceCipher(params.key, len(message))
+		if railFenceErr != nil {
+			return railFenceErr
+		}
 
 		src := []byte(message)
 		dst := make([]byte, len(src))
@@ -189,13 +184,12 @@ func railfenceRunE(mode ciphers.Mode, params *railFenceParams, args []string) er
 
 		blockSizeBytes := params.blockSize * 1024
 
-		railFenceCipher := ciphers.NewRailFenceCipher(params.key, blockSizeBytes, params.numCPU)
-		railFenceCipher.BuildPermutationTable()
-
-		err := engine.ProcessFile(railFenceCipher, mode, inFilePath, outFilePath)
+		railFenceCipher, err := ciphers.NewRailFenceCipher(params.key, blockSizeBytes)
 		if err != nil {
 			return err
 		}
+		engine := engine.NewBlockEngine(railFenceCipher, mode, blockSizeBytes, params.numCPU)
+		return engine.ProcessFile(inFilePath, outFilePath)
 	}
 
 	return nil

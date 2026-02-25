@@ -8,9 +8,23 @@ import (
 	"github.com/ItakawaM/go-cryptotool/ciphers/padding"
 )
 
-func ProcessFile(blockCipher ciphers.BlockCipher, mode ciphers.Mode, inFilePath, outFilePath string) error {
-	blockSize := int64(blockCipher.GetBlockSize())
+type BlockEngine struct {
+	cipher    ciphers.BlockCipher
+	mode      ciphers.Mode
+	blockSize int
+	numCpu    int
+}
 
+func NewBlockEngine(blockCipher ciphers.BlockCipher, mode ciphers.Mode, blockSize int, numCpu int) *BlockEngine {
+	return &BlockEngine{
+		cipher:    blockCipher,
+		mode:      mode,
+		blockSize: blockSize,
+		numCpu:    numCpu,
+	}
+}
+
+func (be *BlockEngine) ProcessFile(inFilePath, outFilePath string) error {
 	inFile, err := os.Open(inFilePath)
 	if err != nil {
 		return err
@@ -29,23 +43,34 @@ func ProcessFile(blockCipher ciphers.BlockCipher, mode ciphers.Mode, inFilePath,
 	}
 	fileSize := info.Size()
 
-	fullBlocks := fileSize / blockSize
-	remainder := fileSize % blockSize
+	fullBlocks := fileSize / int64(be.blockSize)
+	remainder := fileSize % int64(be.blockSize)
 	if err := outFile.Truncate(fileSize); err != nil {
 		return err
 	}
 
-	numWorkers := blockCipher.GetNumWorkers()
-	jobs := make(chan Job, numWorkers)
-	errors := make(chan error, numWorkers)
+	jobs := make(chan Job, be.numCpu)
+	errors := make(chan error, be.numCpu)
 	var waitGroup sync.WaitGroup
 
-	for i := range numWorkers {
-		waitGroup.Add(1)
-		go Worker(i, blockCipher, mode, inFile, outFile, jobs, errors, &waitGroup)
+	var buffers [][]byte
+	if be.cipher.IsInPlace() {
+		buffers = make([][]byte, be.numCpu)
+	} else {
+		buffers = make([][]byte, be.numCpu*2)
+	}
+	for index := range buffers {
+		buffers[index] = make([]byte, be.blockSize)
 	}
 
-	for offset := int64(0); offset < fullBlocks*blockSize; offset += blockSize {
+	for i := range be.numCpu {
+		waitGroup.Add(1)
+		worker := NewWorker(i, buffers, be.cipher, be.mode, inFile, outFile, jobs, errors, &waitGroup)
+
+		go worker.Start()
+	}
+
+	for offset := int64(0); offset < fullBlocks*int64(be.blockSize); offset += int64(be.blockSize) {
 		jobs <- NewJob(offset)
 	}
 	close(jobs)
@@ -61,36 +86,36 @@ func ProcessFile(blockCipher ciphers.BlockCipher, mode ciphers.Mode, inFilePath,
 		}
 	}
 
-	src, dst := blockCipher.GetBuffers(0)
-	switch mode {
+	src, dst := buffers[0], buffers[1]
+	switch be.mode {
 	case ciphers.Encrypt:
 		// Padding last block
-		if _, err := inFile.ReadAt(src[:remainder], fullBlocks*blockSize); err != nil {
+		if _, err := inFile.ReadAt(src[:remainder], fullBlocks*int64(be.blockSize)); err != nil {
 			return err
 		}
-		src = padding.PKCS7Pad(src[:remainder], int(blockSize))
+		src = padding.PKCS7Pad(src[:remainder], int(be.blockSize))
 
-		if err := blockCipher.EncryptBlock(dst, src); err != nil {
+		if err := be.cipher.EncryptBlock(dst, src); err != nil {
 			return err
 		}
 
-		if _, err := outFile.WriteAt(dst, fullBlocks*blockSize); err != nil {
+		if _, err := outFile.WriteAt(dst, fullBlocks*int64(be.blockSize)); err != nil {
 			return err
 		}
 
 	case ciphers.Decrypt:
 		// This block is already decrypted
-		if _, err := outFile.ReadAt(src, (fullBlocks-1)*blockSize); err != nil {
+		if _, err := outFile.ReadAt(src, (fullBlocks-1)*int64(be.blockSize)); err != nil {
 			return err
 		}
 
 		// Verify pad
-		src, err = padding.PKCS7Unpad(src, int(blockSize))
+		src, err = padding.PKCS7Unpad(src, int(be.blockSize))
 		if err != nil {
 			return err
 		}
 
-		if err := outFile.Truncate((fullBlocks-1)*blockSize + int64(len(src))); err != nil {
+		if err := outFile.Truncate((fullBlocks-1)*int64(be.blockSize) + int64(len(src))); err != nil {
 			return err
 		}
 	}

@@ -2,20 +2,15 @@ package ciphers
 
 type CaesarCipher struct {
 	Key               byte
-	BlockSize         int
-	Buffers           [][]byte
+	InPlace           bool
 	SubstitutionTable [256]byte
 	ReverseTable      [256]byte
 }
 
-func NewCaesarCipher(key byte, blockSize int, numCPU int) *CaesarCipher {
-	buffers := make([][]byte, numCPU)
-	for i := range buffers {
-		buffers[i] = make([]byte, blockSize)
-	}
-
+func NewCaesarCipher(key byte) *CaesarCipher {
 	var substitutionTable [256]byte
 	var reverseTable [256]byte
+
 	for char := range byte(255) {
 		if char >= 'a' && char <= 'z' {
 			newChar := 'a' + (char-'a'+key)%26
@@ -32,24 +27,15 @@ func NewCaesarCipher(key byte, blockSize int, numCPU int) *CaesarCipher {
 	}
 
 	return &CaesarCipher{
-		Key:               key,
-		BlockSize:         blockSize,
-		Buffers:           buffers,
+		Key:               key % 26,
+		InPlace:           true,
 		SubstitutionTable: substitutionTable,
 		ReverseTable:      reverseTable,
 	}
 }
 
-func (cc *CaesarCipher) GetBuffers(workerID int) ([]byte, []byte) {
-	return cc.Buffers[workerID], cc.Buffers[workerID]
-}
-
-func (cc *CaesarCipher) GetBlockSize() int {
-	return cc.BlockSize
-}
-
-func (cc *CaesarCipher) GetNumWorkers() int {
-	return len(cc.Buffers)
+func (cc *CaesarCipher) IsInPlace() bool {
+	return cc.InPlace
 }
 
 func (cc *CaesarCipher) EncryptBlock(dst []byte, src []byte) error {
@@ -64,6 +50,7 @@ func (cc *CaesarCipher) EncryptBlock(dst []byte, src []byte) error {
 
 	return nil
 }
+
 func (cc *CaesarCipher) DecryptBlock(dst []byte, src []byte) error {
 	if cc.Key == 0 {
 		copy(dst, src)

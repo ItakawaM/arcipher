@@ -11,14 +11,15 @@ func TestRailFenceEncrypt(t *testing.T) {
 		message   string
 		encrypted string
 		key       int
+		wantErr   bool
 	}{
-		{"Normal 1", "Canabis", "nsaaiCb", 3},
-		{"Normal 2", "Hello World!!", "o!l !lWdeolHr", 5},
-		{"Normal 3", "Chicken", "hceCikn", 2},
-		{"Empty", "", "", 2},
-		{"Big Key", "Hello World!", "!dlroW olleH", 123},
-		{"Negative Key", "Negative", "Negative", -1},
-		{"Key of 1", "Positive", "Positive", 1},
+		{"Normal 1", "Canabis", "nsaaiCb", 3, false},
+		{"Normal 2", "Hello World!!", "o!l !lWdeolHr", 5, false},
+		{"Normal 3", "Chicken", "hceCikn", 2, false},
+		{"Empty", "", "", 2, false},
+		{"Big Key", "Hello World!", "!dlroW olleH", 123, false},
+		{"Negative Key", "Negative", "Negative", -1, true},
+		{"Key of 1", "Positive", "Positive", 1, false},
 	}
 
 	for _, testSubject := range tests {
@@ -26,8 +27,13 @@ func TestRailFenceEncrypt(t *testing.T) {
 			src := []byte(testSubject.message)
 			expected := []byte(testSubject.encrypted)
 
-			cipher := NewRailFenceCipher(testSubject.key, len(src), 1)
-			cipher.BuildPermutationTable()
+			cipher, err := NewRailFenceCipher(testSubject.key, len(src))
+			if (err != nil) != testSubject.wantErr {
+				t.Fatalf("error = %v, wantErr %v", err, testSubject.wantErr)
+			}
+			if err != nil {
+				return
+			}
 
 			dst := make([]byte, len(src))
 
@@ -47,20 +53,25 @@ func TestRailFenceCipher(t *testing.T) {
 		name    string
 		message string
 		key     int
+		wantErr bool
 	}{
-		{"Normal 1", "Canabis", 3},
-		{"Normal 2", "Hello World!", 5},
-		{"Empty", "", 2},
-		{"Big Key", "Hello World!", 123},
-		{"Negative Key", "Negative", -1},
-		{"Key of 1", "Positive", 1},
+		{"Normal 1", "Canabis", 3, false},
+		{"Normal 2", "Hello World!", 5, false},
+		{"Empty", "", 2, false},
+		{"Big Key", "Hello World!", 123, false},
+		{"Negative Key", "Negative", -1, true},
+		{"Key of 1", "Positive", 1, false},
 	}
 
 	for _, testSubject := range tests {
 		t.Run(testSubject.name, func(t *testing.T) {
-			cipher := NewRailFenceCipher(testSubject.key, len(testSubject.message), 1)
-			cipher.BuildPermutationTable()
-
+			cipher, err := NewRailFenceCipher(testSubject.key, len(testSubject.message))
+			if (err != nil) != testSubject.wantErr {
+				t.Fatalf("error = %v, wantErr %v", err, testSubject.wantErr)
+			}
+			if err != nil {
+				return
+			}
 			expected := []byte(testSubject.message)
 			src := make([]byte, len(expected))
 			copy(src, expected)
@@ -95,8 +106,10 @@ func FuzzRailFenceCipher(f *testing.F) {
 			key = len(message)
 		}
 
-		cipher := NewRailFenceCipher(key, len(message), 1)
-		cipher.BuildPermutationTable()
+		cipher, err := NewRailFenceCipher(key, len(message))
+		if err != nil {
+			t.Fatalf("%s", err)
+		}
 
 		expected := []byte(message)
 		src := make([]byte, len(expected))

@@ -12,9 +12,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type caesarParams struct {
+type CaesarParams struct {
 	key byte
-	blockCipherParams
+	BlockCipherParams
 }
 
 func NewCaesarCommand() *cobra.Command {
@@ -39,7 +39,7 @@ using a specified shift value (key).
 }
 
 func newCaesarEncryptCommand() *cobra.Command {
-	params := &caesarParams{}
+	params := &CaesarParams{}
 
 	encryptCmd := &cobra.Command{
 		Use:   "encrypt <key> <message | input> [output]",
@@ -75,14 +75,13 @@ Notes:
 			return caesarPreRunE(cmd, params, args)
 		},
 	}
-
-	addFlags(encryptCmd, &params.blockCipherParams)
+	addFlags(encryptCmd, &params.BlockCipherParams)
 
 	return encryptCmd
 }
 
 func newCaesarDecryptCommand() *cobra.Command {
-	params := &caesarParams{}
+	params := &CaesarParams{}
 
 	decryptCmd := &cobra.Command{
 		Use:   "decrypt <key> <message | input> [output]",
@@ -119,13 +118,12 @@ Notes:
 			return caesarPreRunE(cmd, params, args)
 		},
 	}
-
-	addFlags(decryptCmd, &params.blockCipherParams)
+	addFlags(decryptCmd, &params.BlockCipherParams)
 
 	return decryptCmd
 }
 
-func caesarPreRunE(command *cobra.Command, params *caesarParams, args []string) error {
+func caesarPreRunE(command *cobra.Command, params *CaesarParams, args []string) error {
 	key, err := strconv.Atoi(args[0])
 	if err != nil {
 		return err
@@ -134,7 +132,7 @@ func caesarPreRunE(command *cobra.Command, params *caesarParams, args []string) 
 		return fmt.Errorf("key can not be negative: %d", key)
 	}
 
-	params.key = byte(key % 26) // TODO: CHANGE HARDCODED VALUE
+	params.key = byte(key % 26)
 
 	if len(args) == 2 {
 		if command.Flags().Changed("block") {
@@ -161,7 +159,7 @@ func caesarPreRunE(command *cobra.Command, params *caesarParams, args []string) 
 	return nil
 }
 
-func caesarRunE(mode ciphers.Mode, params *caesarParams, args []string) error {
+func caesarRunE(mode ciphers.Mode, params *CaesarParams, args []string) error {
 	if isVerbose {
 		defer benchmark.MeasurePerformance(fmt.Sprintf("caesar %s", mode))()
 	}
@@ -169,7 +167,7 @@ func caesarRunE(mode ciphers.Mode, params *caesarParams, args []string) error {
 	if len(args) == 2 {
 		message := args[1]
 
-		caesarCipher := ciphers.NewCaesarCipher(params.key, len(message), 1)
+		caesarCipher := ciphers.NewCaesarCipher(params.key)
 
 		buffer := []byte(message)
 
@@ -191,12 +189,10 @@ func caesarRunE(mode ciphers.Mode, params *caesarParams, args []string) error {
 
 		blockSizeBytes := params.blockSize * 1024
 
-		caesarCipher := ciphers.NewCaesarCipher(params.key, blockSizeBytes, params.numCPU)
+		caesarCipher := ciphers.NewCaesarCipher(params.key)
 
-		err := engine.ProcessFile(caesarCipher, mode, inFilePath, outFilePath)
-		if err != nil {
-			return err
-		}
+		engine := engine.NewBlockEngine(caesarCipher, mode, blockSizeBytes, params.numCPU)
+		return engine.ProcessFile(inFilePath, outFilePath)
 	}
 
 	return nil

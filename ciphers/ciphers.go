@@ -15,13 +15,7 @@ func (mode Mode) String() string {
 }
 
 type BlockCipher interface {
-	GetBuffers(workerID int) ([]byte, []byte)
-	GetBlockSize() int
-	GetNumWorkers() int
+	IsInPlace() bool
 	EncryptBlock(dst []byte, src []byte) error
 	DecryptBlock(dst []byte, src []byte) error
-}
-
-type PermutationCipher interface {
-	BuildPermutationTable()
 }
