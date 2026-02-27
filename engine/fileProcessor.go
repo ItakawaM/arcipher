@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"fmt"
 	"os"
 	"sync"
 
@@ -10,22 +9,20 @@ import (
 )
 
 type BlockEngine struct {
-	mode       ciphers.CipherMode
-	blockSize  int
-	numCpu     int
-	notPadding bool
+	mode      ciphers.CipherMode
+	blockSize int
+	numCpu    int
 }
 
-func NewBlockEngine(mode ciphers.CipherMode, blockSize int, numCpu int, notPadding bool) *BlockEngine {
+func NewBlockEngine(mode ciphers.CipherMode, blockSize int, numCpu int) *BlockEngine {
 	return &BlockEngine{
-		mode:       mode,
-		blockSize:  blockSize,
-		numCpu:     numCpu,
-		notPadding: notPadding,
+		mode:      mode,
+		blockSize: blockSize,
+		numCpu:    numCpu,
 	}
 }
 
-func (blockEngine *BlockEngine) ProcessFile(blockCipher ciphers.BlockCipher, inFilePath, outFilePath string) error {
+func (be *BlockEngine) ProcessFile(blockCipher ciphers.BlockCipher, inFilePath, outFilePath string) error {
 	inFile, err := os.Open(inFilePath)
 	if err != nil {
 		return err
@@ -44,39 +41,34 @@ func (blockEngine *BlockEngine) ProcessFile(blockCipher ciphers.BlockCipher, inF
 	}
 	fileSize := info.Size()
 
-	// I haven't thought of anything better to be honest
-	if fileSize < int64(blockEngine.blockSize) && blockEngine.notPadding {
-		return fmt.Errorf("sorry, it's not going to work between us 💔")
-	}
-
-	fullBlocks := fileSize / int64(blockEngine.blockSize)
-	remainder := fileSize % int64(blockEngine.blockSize)
+	fullBlocks := fileSize / int64(be.blockSize)
+	remainder := fileSize % int64(be.blockSize)
 	if err := outFile.Truncate(fileSize); err != nil {
 		return err
 	}
 
-	jobs := make(chan Job, blockEngine.numCpu)
-	errors := make(chan error, blockEngine.numCpu)
+	jobs := make(chan Job, be.numCpu)
+	errors := make(chan error, be.numCpu)
 	var waitGroup sync.WaitGroup
 
 	var buffers [][]byte
 	if blockCipher.IsInPlace() {
-		buffers = make([][]byte, blockEngine.numCpu)
+		buffers = make([][]byte, be.numCpu)
 	} else {
-		buffers = make([][]byte, blockEngine.numCpu*2)
+		buffers = make([][]byte, be.numCpu*2)
 	}
 	for index := range buffers {
-		buffers[index] = make([]byte, blockEngine.blockSize)
+		buffers[index] = make([]byte, be.blockSize)
 	}
 
-	for i := range blockEngine.numCpu {
+	for i := range be.numCpu {
 		waitGroup.Add(1)
-		worker := NewWorker(i, buffers, blockCipher, blockEngine.mode, inFile, outFile, jobs, errors, &waitGroup)
+		worker := NewWorker(i, buffers, blockCipher, be.mode, inFile, outFile, jobs, errors, &waitGroup)
 
 		go worker.Start()
 	}
 
-	for offset := int64(0); offset < fullBlocks*int64(blockEngine.blockSize); offset += int64(blockEngine.blockSize) {
+	for offset := int64(0); offset < fullBlocks*int64(be.blockSize); offset += int64(be.blockSize) {
 		jobs <- NewJob(offset)
 	}
 	close(jobs)
@@ -92,39 +84,37 @@ func (blockEngine *BlockEngine) ProcessFile(blockCipher ciphers.BlockCipher, inF
 		}
 	}
 
-	if !blockEngine.notPadding {
-		src, dst := buffers[0], buffers[1]
-		switch blockEngine.mode {
-		case ciphers.Encrypt:
-			// Padding last block
-			if _, err := inFile.ReadAt(src[:remainder], fullBlocks*int64(blockEngine.blockSize)); err != nil {
-				return err
-			}
-			src = padding.PKCS7Pad(src[:remainder], int(blockEngine.blockSize))
+	src, dst := buffers[0], buffers[1]
+	switch be.mode {
+	case ciphers.Encrypt:
+		// Padding last block
+		if _, err := inFile.ReadAt(src[:remainder], fullBlocks*int64(be.blockSize)); err != nil {
+			return err
+		}
+		src = padding.PKCS7Pad(src[:remainder], int(be.blockSize))
 
-			if err := blockCipher.EncryptBlock(dst, src); err != nil {
-				return err
-			}
+		if err := blockCipher.EncryptBlock(dst, src); err != nil {
+			return err
+		}
 
-			if _, err := outFile.WriteAt(dst, fullBlocks*int64(blockEngine.blockSize)); err != nil {
-				return err
-			}
+		if _, err := outFile.WriteAt(dst, fullBlocks*int64(be.blockSize)); err != nil {
+			return err
+		}
 
-		case ciphers.Decrypt:
-			// This block is already decrypted
-			if _, err := outFile.ReadAt(src, (fullBlocks-1)*int64(blockEngine.blockSize)); err != nil {
-				return err
-			}
+	case ciphers.Decrypt:
+		// This block is already decrypted
+		if _, err := outFile.ReadAt(src, (fullBlocks-1)*int64(be.blockSize)); err != nil {
+			return err
+		}
 
-			// Verify pad
-			src, err = padding.PKCS7Unpad(src, int(blockEngine.blockSize))
-			if err != nil {
-				return err
-			}
+		// Verify pad
+		src, err = padding.PKCS7Unpad(src, int(be.blockSize))
+		if err != nil {
+			return err
+		}
 
-			if err := outFile.Truncate((fullBlocks-1)*int64(blockEngine.blockSize) + int64(len(src))); err != nil {
-				return err
-			}
+		if err := outFile.Truncate((fullBlocks-1)*int64(be.blockSize) + int64(len(src))); err != nil {
+			return err
 		}
 	}
 
