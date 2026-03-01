@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"runtime"
 	"slices"
 
@@ -30,6 +31,14 @@ func modeFromArgs(lenArgs int) (WorkingMode, error) {
 	default:
 		return 0, fmt.Errorf("invalid number of arguments")
 	}
+}
+
+func fileExists(filepath string) bool {
+	if _, err := os.Stat(filepath); err == nil {
+		return true
+	}
+
+	return false
 }
 
 var isVerbose bool

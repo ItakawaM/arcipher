@@ -9,6 +9,7 @@ import (
 
 	"github.com/ItakawaM/go-cryptotool/benchmark"
 	"github.com/ItakawaM/go-cryptotool/ciphers"
+	"github.com/ItakawaM/go-cryptotool/ciphers/analyze"
 	"github.com/ItakawaM/go-cryptotool/engine"
 	"github.com/spf13/cobra"
 )
@@ -38,6 +39,7 @@ using a specified shift value (key).
 		newCaesarEncryptCommand(),
 		newCaesarDecryptCommand(),
 		newCaesarBruteforceCommand(),
+		newCaesarAnalyzeCommand(),
 	)
 
 	return caesarCmd
@@ -172,6 +174,70 @@ Notes:
 	params.addFlags(bruteforceCmd)
 
 	return bruteforceCmd
+}
+
+func newCaesarAnalyzeCommand() *cobra.Command {
+	analyzeCmd := &cobra.Command{
+		Use:   "analyze <message | input>",
+		Short: "Analyze a given message/file for a possible shift key",
+		Args:  cobra.ExactArgs(1),
+		Long: `This command attempts to automatically determine the most
+probable shift key of a Caesar-encrypted message or file
+using frequency analysis.
+
+Instead of printing all possible shifts, the analyze mode
+decrypts the input with every possible key (from 0 to 25)
+and scores each result based on how closely it matches
+typical English letter frequency.
+
+The scoring method uses statistical comparison (chi-squared)
+between the decrypted text and known English letter distributions.
+The most likely plaintext appears first in the output.
+
+Non-alphabetic characters remain unchanged during analysis.
+
+This mode is useful when the shift key is unknown and you
+want the tool to automatically rank the most probable results.
+
+Examples:
+
+  Analyze text:
+    1. cipher caesar analyze "DwwdfnDwGdzq"
+
+  Analyze a file:
+    1. cipher caesar analyze file.enc
+
+Notes:
+
+  • All 26 shift values are tested automatically
+  • Results are sorted by statistical likelihood
+  • Lower score = more probable plaintext
+  • Works best with sufficiently large input (recommended ≥ 100 characters)
+  • Only alphabetic characters are used for frequency scoring
+`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			source := args[0]
+
+			var results []analyze.AnalysisResult
+			var resultsErr error
+			if !fileExists(source) {
+				results, resultsErr = analyze.AnalyzeCaesarBuffer([]byte(source))
+			} else {
+				results, resultsErr = analyze.AnalyzeCaesarFile(source)
+			}
+			if resultsErr != nil {
+				return resultsErr
+			}
+
+			for i := range 5 {
+				fmt.Println(results[i])
+			}
+
+			return nil
+		},
+	}
+
+	return analyzeCmd
 }
 
 func caesarPreRunE(command *cobra.Command, params *CaesarParams, args []string) error {

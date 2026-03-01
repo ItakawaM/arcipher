@@ -10,7 +10,7 @@ type CaesarCipher struct {
 }
 
 func NewCaesarCipher(key byte) (*CaesarCipher, error) {
-	if key < 1 {
+	if key < 0 {
 		return nil, fmt.Errorf("incorrect key provided: %d", key)
 	}
 
