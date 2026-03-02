@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/ItakawaM/go-cryptotool/benchmark"
 	"github.com/ItakawaM/go-cryptotool/ciphers"
-	"github.com/ItakawaM/go-cryptotool/engine"
+	"github.com/ItakawaM/go-cryptotool/internal/benchmark"
+	"github.com/ItakawaM/go-cryptotool/internal/engine"
 	"github.com/spf13/cobra"
 )
 
