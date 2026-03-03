@@ -233,7 +233,7 @@ Notes:
 				return resultsErr
 			}
 
-			for i := range 5 {
+			for i := range len(results) {
 				fmt.Println(results[i])
 			}
 
