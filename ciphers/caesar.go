@@ -47,6 +47,10 @@ func (cc *CaesarCipher) IsInPlace() bool {
 }
 
 func (cc *CaesarCipher) EncryptBlock(dst []byte, src []byte) error {
+	if len(dst) != len(src) {
+		return fmt.Errorf("block size mismatch src=%d dst=%d", len(src), len(dst))
+	}
+
 	if cc.Key == 0 {
 		copy(dst, src)
 		return nil
@@ -60,6 +64,10 @@ func (cc *CaesarCipher) EncryptBlock(dst []byte, src []byte) error {
 }
 
 func (cc *CaesarCipher) DecryptBlock(dst []byte, src []byte) error {
+	if len(dst) != len(src) {
+		return fmt.Errorf("block size mismatch src=%d dst=%d", len(src), len(dst))
+	}
+
 	if cc.Key == 0 {
 		copy(dst, src)
 		return nil

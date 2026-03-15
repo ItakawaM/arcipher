@@ -9,6 +9,10 @@ type RailFenceCipher struct {
 }
 
 func NewRailFenceCipher(key int, blockSize int) (*RailFenceCipher, error) {
+	if blockSize <= 0 {
+		return nil, fmt.Errorf("incorrect blockSize provided: %d", blockSize)
+	}
+
 	permutationTable := make([]int, blockSize)
 	inverseTable := make([]int, blockSize)
 
@@ -113,6 +117,11 @@ func (rfCipher *RailFenceCipher) Visualize(message string) {
 }
 
 func (rfCipher *RailFenceCipher) EncryptBlock(dst []byte, src []byte) error {
+	blockSize := len(rfCipher.PermutationTable)
+	if len(src) != blockSize || len(dst) != blockSize {
+		return fmt.Errorf("block size mismatch: expected %d, got src=%d dst=%d", blockSize, len(src), len(dst))
+	}
+
 	if rfCipher.Key == 1 {
 		copy(dst, src)
 		return nil
@@ -126,6 +135,11 @@ func (rfCipher *RailFenceCipher) EncryptBlock(dst []byte, src []byte) error {
 }
 
 func (rfCipher *RailFenceCipher) DecryptBlock(dst []byte, src []byte) error {
+	blockSize := len(rfCipher.PermutationTable)
+	if len(src) != blockSize || len(dst) != blockSize {
+		return fmt.Errorf("block size mismatch: expected %d, got src=%d dst=%d", blockSize, len(src), len(dst))
+	}
+
 	if rfCipher.Key == 1 {
 		copy(dst, src)
 		return nil
