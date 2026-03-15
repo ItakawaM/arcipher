@@ -48,10 +48,10 @@ A key of 1 results in no transformation.
 Examples:
 
   Encrypt text:
-    1. cipher railfence encrypt 3 "Canabis"
+    1. go-cryptotool railfence encrypt 3 "Canabis"
   
   Encrypt a file:
-    1. cipher railfence encrypt 5 file.txt file.enc
+    1. go-cryptotool railfence encrypt 5 file.txt file.enc
 
 Notes:
 
@@ -88,10 +88,10 @@ using a specified number of rails (key).
 Examples:
 
   Decrypt text:
-    1. cipher railfence decrypt 3 "nsaaiCb"
+    1. go-cryptotool railfence decrypt 3 "nsaaiCb"
   
   Decrypt a file:
-    1. cipher railfence decrypt 5 file.enc file.txt
+    1. go-cryptotool railfence decrypt 5 file.enc file.txt
 
 Notes:
 
@@ -137,7 +137,6 @@ func railfencePreRunE(command *cobra.Command, params *RailFenceParams, args []st
 	}
 }
 
-// Logic
 func railfenceRunE(mode ciphers.CipherMode, params *RailFenceParams, args []string) error {
 	if isVerbose {
 		defer benchmark.MeasurePerformance(fmt.Sprintf("railfence %s", mode))()

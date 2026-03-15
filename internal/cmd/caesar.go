@@ -64,10 +64,10 @@ A shift of 0 results in no transformation.
 Examples:
 
   Encrypt text:
-    1. cipher caesar encrypt 3 "AttackAtDawn"
+    1. go-cryptotool caesar encrypt 3 "AttackAtDawn"
 
   Encrypt a file:
-    1. cipher caesar encrypt 5 file.txt file.enc
+    1. go-cryptotool caesar encrypt 5 file.txt file.enc
 
 Notes:
 
@@ -106,10 +106,10 @@ A shift of 0 results in no transformation.
 Examples:
 
   Decrypt text:
-    1. cipher caesar decrypt 3 "DwwdfnDwGdzq"
+    1. go-cryptotool caesar decrypt 3 "DwwdfnDwGdzq"
 
   Decrypt a file:
-    1. cipher caesar decrypt 5 file.enc file.txt
+    1. go-cryptotool caesar decrypt 5 file.enc file.txt
 
 Notes:
 
@@ -152,10 +152,10 @@ This is useful when the original shift key is unknown.
 Examples:
 
   Bruteforce text:
-    1. cipher caesar bruteforce "DwwdfnDwGdzq"
+    1. go-cryptotool caesar bruteforce "DwwdfnDwGdzq"
 
   Bruteforce a file:
-    1. cipher caesar bruteforce file.enc output.txt
+    1. go-cryptotool caesar bruteforce file.enc output.txt
 
 Notes:
 
@@ -202,10 +202,10 @@ want the tool to automatically rank the most probable results.
 Examples:
 
   Analyze text:
-    1. cipher caesar analyze "DwwdfnDwGdzq"
+    1. go-cryptotool caesar analyze "DwwdfnDwGdzq"
 
   Analyze a file:
-    1. cipher caesar analyze file.enc
+    1. go-cryptotool caesar analyze file.enc
 
 Notes:
 
