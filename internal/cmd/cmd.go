@@ -9,28 +9,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type BlockCipherParams struct {
+type blockCipherParams struct {
 	blockSize int
 	numCPU    int
-	mode      WorkingMode
 }
 
-type WorkingMode int8
-
-const (
-	ModeMessage WorkingMode = iota
-	ModeFiles
-)
-
-func modeFromArgs(lenArgs int) (WorkingMode, error) {
-	switch lenArgs {
-	case 1:
-		return ModeMessage, nil
-	case 2:
-		return ModeFiles, nil
-	default:
-		return 0, fmt.Errorf("invalid number of arguments")
-	}
+var isVerbose bool
+var allowedBlockSizes = []int{
+	16, 32, 64, 128, 256, 512,
+	1024, 2048, 4096, 8192, 16384,
 }
 
 func fileExists(filepath string) bool {
@@ -41,13 +28,7 @@ func fileExists(filepath string) bool {
 	return false
 }
 
-var isVerbose bool
-var allowedBlockSizes = []int{
-	16, 32, 64, 128, 256, 512,
-	1024, 2048, 4096, 8192, 16384,
-}
-
-func (params *BlockCipherParams) parseModeMessageArgs(command *cobra.Command) error {
+func (params *blockCipherParams) parseSourceMessageParams(command *cobra.Command) error {
 	if command.Flags().Changed("block") {
 		return fmt.Errorf("--block can only be used when processing files")
 	}
@@ -59,7 +40,7 @@ func (params *BlockCipherParams) parseModeMessageArgs(command *cobra.Command) er
 	return nil
 }
 
-func (params *BlockCipherParams) parseModeFilesArgs() error {
+func (params *blockCipherParams) parseSourceFileParams() error {
 	if !slices.Contains(allowedBlockSizes, params.blockSize) {
 		return fmt.Errorf("invalid block size: %d", params.blockSize)
 	}
@@ -73,7 +54,7 @@ func (params *BlockCipherParams) parseModeFilesArgs() error {
 	return nil
 }
 
-func (params *BlockCipherParams) addFlags(command *cobra.Command) {
+func (params *blockCipherParams) addFlags(command *cobra.Command) {
 	command.Flags().IntVarP(&params.blockSize, "block", "b", 64, "Block size (KB): 16 32 64 128 256 512 1024 2048 4096 8192 16384")
 	command.Flags().IntVarP(&params.numCPU, "threads", "t", runtime.NumCPU()/2, "Amount of threads to be used")
 }

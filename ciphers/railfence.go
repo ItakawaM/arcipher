@@ -85,37 +85,6 @@ func (rfCipher *RailFenceCipher) IsInPlace() bool {
 	return false
 }
 
-func (rfCipher *RailFenceCipher) Visualize(message string) {
-	if rfCipher.Key == 1 {
-		fmt.Println(message)
-		return
-	}
-
-	cycle := 2 * (rfCipher.Key - 1)
-	blockSize := len(message)
-
-	rails := make([]int, blockSize)
-	for index := range blockSize {
-		cyclePosition := index % cycle
-		if cyclePosition < rfCipher.Key {
-			rails[index] = cyclePosition
-		} else {
-			rails[index] = cycle - cyclePosition
-		}
-	}
-
-	for rail := min(rfCipher.Key, blockSize) - 1; rail >= 0; rail-- {
-		for index := range blockSize {
-			if rails[index] == rail {
-				fmt.Printf("%s ", string(message[index]))
-			} else {
-				fmt.Print(". ")
-			}
-		}
-		fmt.Println("")
-	}
-}
-
 func (rfCipher *RailFenceCipher) EncryptBlock(dst []byte, src []byte) error {
 	blockSize := len(rfCipher.PermutationTable)
 	if len(src) != blockSize || len(dst) != blockSize {
