@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "target": "ES2019",
+        "lib": [
+            "DOM",
+            "ES2019"
+        ],
+        "outFile": "static/main.js",
+        "strict": true
+    },
+    "include": [
+        "static/main.ts"
+    ]
+}

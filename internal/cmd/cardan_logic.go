@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -12,6 +13,7 @@ import (
 	"github.com/ItakawaM/go-cryptotool/ciphers"
 	"github.com/ItakawaM/go-cryptotool/internal/benchmark"
 	"github.com/ItakawaM/go-cryptotool/internal/engine"
+	"github.com/ItakawaM/go-cryptotool/internal/server"
 	"github.com/spf13/cobra"
 )
 
@@ -92,36 +94,26 @@ func cardanPreRunE(command *cobra.Command, args []string, params *cardanParams) 
 }
 
 func cardanRunE(command *cobra.Command, args []string, params *cardanParams, mode ciphers.CipherMode) error {
-	if isVerbose {
+	if isVerbose && len(args) != 1 {
 		defer benchmark.MeasurePerformance(fmt.Sprintf("cardan %s", mode))()
 	}
 
 	switch len(args) {
 	case 1:
-		command.Println("WIP")
+		ctx, cancel := context.WithCancel(context.Background())
+
+		ch := server.GetCardanKeyUI(params.blockSize, ctx)
+		params.gridKey = <-ch
+		cancel()
+
+		if isVerbose {
+			defer benchmark.MeasurePerformance(fmt.Sprintf("cardan %s", mode))()
+		}
+		command.Println(params.gridKey)
+		return cardanRunEMessage(command, args, params, mode)
 
 	case 2:
-		cardanCipher, cardanErr := ciphers.NewCardanCipher(params.gridKey, params.blockSize)
-		if cardanErr != nil {
-			return cardanErr
-		}
-
-		src := []byte(args[1])
-		src = append(src, bytes.Repeat([]byte(" "), params.blockSize*params.blockSize-len(src))...)
-		dst := make([]byte, len(src))
-
-		var err error
-		switch mode {
-		case ciphers.Encrypt:
-			err = cardanCipher.EncryptBlock(dst, src)
-		case ciphers.Decrypt:
-			err = cardanCipher.DecryptBlock(dst, src)
-		}
-		if err != nil {
-			return err
-		}
-
-		command.Println(string(dst))
+		return cardanRunEMessage(command, args, params, mode)
 
 	case 3:
 		cardanCipher, cardanErr := ciphers.NewCardanCipher(params.gridKey, params.blockSize)
@@ -135,6 +127,39 @@ func cardanRunE(command *cobra.Command, args []string, params *cardanParams, mod
 		return engine.NewBlockEngine(params.blockSize*params.blockSize, params.numCPU).ProcessFile(cardanCipher, mode, inFilePath, outFilePath)
 	}
 
+	return nil
+}
+
+func cardanRunEMessage(command *cobra.Command, args []string, params *cardanParams, mode ciphers.CipherMode) error {
+	cardanCipher, cardanErr := ciphers.NewCardanCipher(params.gridKey, params.blockSize)
+	if cardanErr != nil {
+		return cardanErr
+	}
+
+	var index int
+	switch len(args) {
+	case 1:
+		index = 0
+	case 2:
+		index = 1
+	}
+
+	src := []byte(args[index])
+	src = append(src, bytes.Repeat([]byte(" "), params.blockSize*params.blockSize-len(src))...)
+	dst := make([]byte, len(src))
+
+	var err error
+	switch mode {
+	case ciphers.Encrypt:
+		err = cardanCipher.EncryptBlock(dst, src)
+	case ciphers.Decrypt:
+		err = cardanCipher.DecryptBlock(dst, src)
+	}
+	if err != nil {
+		return err
+	}
+
+	command.Println(string(dst))
 	return nil
 }
 
@@ -172,6 +197,9 @@ func cardanGenerateKeyRunE(command *cobra.Command, args []string, params *cardan
 		return err
 	}
 
-	defer command.Printf("Key written to %s\n", args[1])
-	return outFile.Close()
+	if err := outFile.Close(); err != nil {
+		return err
+	}
+	command.Printf("Key written to %s\n", args[1])
+	return nil
 }

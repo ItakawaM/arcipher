@@ -1,6 +1,7 @@
 package ciphers
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand/v2"
 	"slices"
@@ -13,6 +14,14 @@ type CardanCipher struct {
 
 type CardanKey struct {
 	Key []int `json:"key"`
+}
+
+func (cK *CardanKey) String() string {
+	jsonData, err := json.Marshal(cK)
+	if err != nil {
+		return fmt.Sprintf("CardanKey{Key: %v}", cK.Key)
+	}
+	return string(jsonData)
 }
 
 type pointCoordinates struct {
