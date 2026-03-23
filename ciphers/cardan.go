@@ -1,9 +1,10 @@
 package ciphers
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"math/rand/v2"
+	"math/big"
 	"slices"
 )
 
@@ -124,12 +125,24 @@ func GenerateCardanKey(gridSize int) (*CardanKey, error) {
 			}
 
 			allRotations := getAllRotations(point, gridSize)
-			randomIndex := rand.IntN(len(allRotations))
+			randomIndex, err := cryptoRandN(len(allRotations))
+			if err != nil {
+				return nil, fmt.Errorf("failed to generate random index: %w", err)
+			}
 			key[keyIndex] = pointToIndex(allRotations[randomIndex], gridSize)
 			keyIndex++
 		}
 	}
 	return &CardanKey{key}, nil
+}
+
+func cryptoRandN(n int) (int, error) {
+	bigN := big.NewInt(int64(n))
+	val, err := rand.Int(rand.Reader, bigN)
+	if err != nil {
+		return 0, err
+	}
+	return int(val.Int64()), nil
 }
 
 func NewCardanCipher(gridKey *CardanKey, gridSize int) (*CardanCipher, error) {
