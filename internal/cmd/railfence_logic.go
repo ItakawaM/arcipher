@@ -66,7 +66,7 @@ func railfenceRunE(command *cobra.Command, args []string, params *railfenceParam
 			return err
 		}
 
-		command.Println(string(dst))
+		command.Printf("'%s'", string(dst))
 		return nil
 
 	case 2:

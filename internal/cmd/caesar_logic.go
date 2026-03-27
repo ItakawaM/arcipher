@@ -68,7 +68,7 @@ func caesarRunE(command *cobra.Command, args []string, params *caesarParams, mod
 			return err
 		}
 
-		command.Println(string(buffer))
+		command.Printf("'%s'", string(buffer))
 
 	case 2:
 		inFilePath := args[1]
@@ -123,7 +123,7 @@ func caesarBruteforceRunE(command *cobra.Command, args []string, params *caesarP
 				return err
 			}
 
-			command.Printf("[%d]: %s\n", i, string(dst))
+			command.Printf("[%d]: '%s'\n", i, string(dst))
 		}
 
 	case 2:
