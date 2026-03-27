@@ -50,7 +50,7 @@ func ValidateCardanKey(gridKey *CardanKey, gridSize int) error {
 	centerIndex := -1
 
 	if gridSize%2 != 0 {
-		centerIndex = (gridSize - 1) / 2
+		centerIndex = (maxIndex - 1) / 2
 	}
 
 	expectedKeyLen := (maxIndex - gridSize%2) / 4
@@ -161,7 +161,7 @@ func NewCardanCipher(gridKey *CardanKey, gridSize int) (*CardanCipher, error) {
 
 	// Set the last element to center in an odd grid
 	if gridSize%2 != 0 {
-		center := (gridSize - 1) / 2
+		center := (gridSize*gridSize - 1) / 2
 		permutationTable[len(permutationTable)-1] = center
 	}
 
