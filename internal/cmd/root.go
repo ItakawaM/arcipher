@@ -11,7 +11,10 @@ var rootCmd = &cobra.Command{
 	Short: "Classic encryption ciphers in Go!",
 	Long: `ItakawaM
 	
-	Work In Progress`, // TODO: Create a nice Long description
+	Work In Progress`,
+	// TODO: Create a nice Long description for the cli tool itself
+	// TODO: Replace current placeholder Long descriptions
+	// TODO: Create shared RunE and PreRunE for simple ciphers: Vigenere, Railfence and Caesar
 
 }
 
@@ -29,5 +32,6 @@ func init() {
 		NewRailFenceCommand(),
 		NewCaesarCommand(),
 		NewCardanCommand(),
+		NewVigenereCommand(),
 	)
 }
