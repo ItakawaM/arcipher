@@ -20,6 +20,7 @@ length of the plaintext.
 	vigenereCmd.AddCommand(
 		newVigenereEncryptCommand(),
 		newVigenereDecryptCommand(),
+		newVigenereBruteforceAttack(),
 	)
 
 	return vigenereCmd
@@ -103,4 +104,44 @@ Notes:
 	params.addFlags(decryptCmd)
 
 	return decryptCmd
+}
+
+func newVigenereBruteforceAttack() *cobra.Command {
+	params := &vigenereBruteforceParams{}
+
+	bruteforceCmd := &cobra.Command{
+		Use:   "bruteforce <wordlist> <message | input> [output]",
+		Short: "Attempt to decrypt a message/file using a dictionary of possible Vigenère keys",
+		Args:  cobra.RangeArgs(2, 3),
+		Long: `This command attempts to decrypt a message or file
+encrypted with the Vigenère cipher by trying keys from a provided wordlist.
+
+Each word in the wordlist is used as a candidate key to decrypt the input.
+Non-alphabetic characters remain unchanged.
+
+Examples:
+
+  Bruteforce text using a wordlist:
+    1. go-cryptotool vigenere bruteforce wordlist.txt "LxfopvEfRnhr"
+
+  Bruteforce a file:
+    1. go-cryptotool vigenere bruteforce wordlist.txt file.enc output_directory
+
+Notes:
+
+  • Each word in the wordlist is treated as a potential key
+  • Non-alphabetic keys are skipped
+  • Decryption is performed using each candidate key
+  • Output may contain many candidate plaintexts
+`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return vigenereBruteforceRunE(cmd, args, params)
+		},
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return vigenereBruteforcePreRunE(cmd, args, params)
+		},
+	}
+	params.addFlags(bruteforceCmd)
+
+	return bruteforceCmd
 }
