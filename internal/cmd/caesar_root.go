@@ -130,7 +130,7 @@ Notes:
   • Output may contain many candidate plaintexts
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return caesarBruteforceRunE(cmd, args, params)
+			return caesarBruteforceRunE(args, params)
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return caesarBruteforcePreRunE(cmd, params, args)
@@ -173,7 +173,7 @@ Notes:
   • Only alphabetic characters are used for frequency scoring
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return caesarAnalyzeRunE(cmd, args)
+			return caesarAnalyzeRunE(args)
 		},
 	}
 

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"text/tabwriter"
 
 	"github.com/ItakawaM/go-cryptotool/ciphers"
 	"github.com/ItakawaM/go-cryptotool/internal/benchmark"
@@ -85,7 +86,7 @@ func vigenereBruteforcePreRunE(command *cobra.Command, args []string, params *vi
 	}
 }
 
-func vigenereBruteforceRunE(command *cobra.Command, args []string, params *vigenereBruteforceParams, autokey bool) error {
+func vigenereBruteforceRunE(args []string, params *vigenereBruteforceParams, autokey bool) error {
 	if isVerbose {
 		defer benchmark.MeasurePerformance("vigenere bruteforce")()
 	}
@@ -96,14 +97,17 @@ func vigenereBruteforceRunE(command *cobra.Command, args []string, params *vigen
 		src := []byte(message)
 		dst := bytes.Clone(src)
 
+		tab := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(tab, "Key\tPlaintext")
 		for word := range params.dictionary {
 			vigenereVariant := getVigenereVariant(word, autokey)
 			if err := vigenereVariant.DecryptBlock(dst, src); err != nil {
 				return err
 			}
 
-			command.Printf("[%s]: '%s'\n", word, string(dst))
+			fmt.Fprintf(tab, "%s\t%s\n", word, string(dst))
 		}
+		tab.Flush()
 
 	case 2:
 		inFilePath, outFilePathFolder := args[1], fmt.Sprintf("%s_bruteforce", args[2])

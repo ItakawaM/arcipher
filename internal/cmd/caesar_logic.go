@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"text/tabwriter"
 
 	"github.com/ItakawaM/go-cryptotool/ciphers"
 	"github.com/ItakawaM/go-cryptotool/ciphers/analyze"
@@ -52,7 +53,7 @@ func caesarBruteforcePreRunE(command *cobra.Command, params *blockCipherParams, 
 	}
 }
 
-func caesarBruteforceRunE(command *cobra.Command, args []string, params *blockCipherParams) error {
+func caesarBruteforceRunE(args []string, params *blockCipherParams) error {
 	if isVerbose {
 		defer benchmark.MeasurePerformance("caesar bruteforce")()
 	}
@@ -64,6 +65,8 @@ func caesarBruteforceRunE(command *cobra.Command, args []string, params *blockCi
 		src := []byte(message)
 		dst := bytes.Clone(src)
 
+		tab := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(tab, "Key\tPlaintext")
 		for i := range 26 {
 			caesarCipher, err := ciphers.NewCaesarCipher(i)
 			if err != nil {
@@ -75,8 +78,9 @@ func caesarBruteforceRunE(command *cobra.Command, args []string, params *blockCi
 				return err
 			}
 
-			command.Printf("[%02d]: '%s'\n", i, string(dst))
+			fmt.Fprintf(tab, "%02d\t%s\n", i, string(dst))
 		}
+		tab.Flush()
 
 	case 2:
 		inFilePath, outFilePathFolder := args[0], fmt.Sprintf("%s_bruteforce", args[1])
@@ -102,7 +106,7 @@ func caesarBruteforceRunE(command *cobra.Command, args []string, params *blockCi
 	return nil
 }
 
-func caesarAnalyzeRunE(command *cobra.Command, args []string) error {
+func caesarAnalyzeRunE(args []string) error {
 	if isVerbose {
 		defer benchmark.MeasurePerformance("caesar analyze")()
 	}
@@ -122,9 +126,13 @@ func caesarAnalyzeRunE(command *cobra.Command, args []string) error {
 		return err
 	}
 
-	for i := range len(results) {
-		command.Println(results[i])
+	tab := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(tab, "Key\tChi\tEnglish")
+	for _, result := range results {
+		fmt.Fprintf(tab, "%02d\t%.3f\t%.3f\n",
+			result.Key, result.ChiScore, result.EnglishScore)
 	}
+	tab.Flush()
 
 	return nil
 }

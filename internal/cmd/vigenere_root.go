@@ -138,7 +138,7 @@ Notes:
   • Output may contain many candidate plaintexts
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return vigenereBruteforceRunE(cmd, args, params, autokey)
+			return vigenereBruteforceRunE(args, params, autokey)
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return vigenereBruteforcePreRunE(cmd, args, params)
