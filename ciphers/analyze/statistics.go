@@ -44,7 +44,7 @@ func newStatisticsModel() *statisticsModel {
 	}
 }
 
-func (model *statisticsModel) calculateLetterFrequencies(buffer []byte) [26]letterFrequency {
+func calculateLetterFrequencies(buffer []byte, normalize bool) [26]letterFrequency {
 	var frequencies [26]letterFrequency
 	for i := range 26 {
 		frequencies[i].letter = byte('a' + i)
@@ -55,19 +55,23 @@ func (model *statisticsModel) calculateLetterFrequencies(buffer []byte) [26]lett
 		switch {
 		case char >= 'a' && char <= 'z':
 			frequencies[char-'a'].frequency++
+			total++
 
 		case char >= 'A' && char <= 'Z':
 			frequencies[char-'A'].frequency++
+			total++
 		}
-		total++
+
 	}
 
 	if total == 0 {
 		return frequencies
 	}
 
-	for i := range frequencies {
-		frequencies[i].frequency = (frequencies[i].frequency / total) * 100
+	if normalize {
+		for i := range frequencies {
+			frequencies[i].frequency = (frequencies[i].frequency / total) * 100
+		}
 	}
 
 	return frequencies

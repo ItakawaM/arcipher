@@ -21,7 +21,7 @@ func (analyzer *CaesarAnalyzer) AnalyzeBuffer(buffer []byte) ([]AnalysisResult, 
 
 	dst := make([]byte, len(buffer))
 
-	frequencies := analyzer.model.calculateLetterFrequencies(buffer)
+	frequencies := calculateLetterFrequencies(buffer, true)
 	sort.Slice(frequencies[:], func(i, j int) bool {
 		return frequencies[i].frequency > frequencies[j].frequency
 	})
@@ -36,7 +36,7 @@ func (analyzer *CaesarAnalyzer) AnalyzeBuffer(buffer []byte) ([]AnalysisResult, 
 		}
 		caesarCipher.DecryptBlock(dst, buffer)
 
-		newFrequencies := analyzer.model.calculateLetterFrequencies(dst)
+		newFrequencies := calculateLetterFrequencies(dst, true)
 		decryptedScore := analyzer.model.calculateChiSquared(newFrequencies)
 
 		results = append(results, AnalysisResult{
