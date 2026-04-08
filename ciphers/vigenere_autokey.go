@@ -1,11 +1,24 @@
+// Package ciphers provides implementations of various classical and modern encryption ciphers.
 package ciphers
 
 import "fmt"
 
+/*
+VigenereAutoKeyCipher is a variant of the Vigenere cipher that uses the plaintext
+itself (after the key) as the key for subsequent encryptions, providing
+stronger security than the standard Vigenere cipher.
+*/
 type VigenereAutoKeyCipher struct {
 	VigenereCipher
 }
 
+/*
+NewVigenereAutoKeyCipher creates a new Vigenere Auto-Key cipher with the given key.
+
+The key must be a non-empty string of ASCII letters.
+
+Returns an error if the key is invalid.
+*/
 func NewVigenereAutoKeyCipher(key []byte) (*VigenereAutoKeyCipher, error) {
 	normalizedKey, err := NormalizeVigenereKey(key)
 	if err != nil {
@@ -15,14 +28,32 @@ func NewVigenereAutoKeyCipher(key []byte) (*VigenereAutoKeyCipher, error) {
 	return &VigenereAutoKeyCipher{VigenereCipher{Key: normalizedKey}}, nil
 }
 
+/*
+NewVigenereAutoKeyCipherNormalized creates a new Vigenere Auto-Key cipher with an already normalized key.
+*/
 func NewVigenereAutoKeyCipherNormalized(normalizedKey []byte) *VigenereAutoKeyCipher {
 	return &VigenereAutoKeyCipher{VigenereCipher{Key: normalizedKey}}
 }
 
+/*
+IsInPlace returns whether the cipher can perform encryption/decryption in-place.
+
+Vigenere Auto-Key cipher does not support in-place operations since
+decryption reads from dst as key material before it is fully written.
+*/
 func (vCipher *VigenereAutoKeyCipher) IsInPlace() bool {
 	return false
 }
 
+/*
+EncryptBlock encrypts src using the Vigenere Auto-Key cipher and writes the result to dst.
+
+The key cycles over letter characters only; non-letter characters are passed through unchanged.
+
+src and dst cannot alias.
+
+src and dst must be the same length.
+*/
 func (vCipher *VigenereAutoKeyCipher) EncryptBlock(dst []byte, src []byte) error {
 	if len(dst) != len(src) {
 		return fmt.Errorf("block size mismatch src=%d dst=%d", len(src), len(dst))
@@ -65,6 +96,15 @@ func (vCipher *VigenereAutoKeyCipher) EncryptBlock(dst []byte, src []byte) error
 	return nil
 }
 
+/*
+DecryptBlock decrypts src using the Vigenere Auto-Key cipher and writes the result to dst.
+
+The key cycles over letter characters only; non-letter characters are passed through unchanged.
+
+src and dst cannot alias.
+
+src and dst must be the same length.
+*/
 func (vCipher *VigenereAutoKeyCipher) DecryptBlock(dst []byte, src []byte) error {
 	if len(dst) != len(src) {
 		return fmt.Errorf("block size mismatch src=%d dst=%d", len(src), len(dst))
