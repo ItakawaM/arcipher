@@ -1,3 +1,4 @@
+// Package ciphers provides implementations of various classical and modern encryption ciphers.
 package ciphers
 
 import (
@@ -8,14 +9,31 @@ import (
 	"slices"
 )
 
+/*
+CardanCipher is a grille-based transposition cipher that uses a rotating grid (Cardan grille)
+to encrypt messages.
+
+The cipher works by placing holes in a grid pattern and rotating
+the grid four times to mark which positions are "holes".
+*/
 type CardanCipher struct {
 	PermutationTable []int
 }
 
+/*
+CardanKey represents the key for a Cardan grille cipher.
+
+It contains a list of indexes that form the initial hole pattern.
+*/
 type CardanKey struct {
 	Key []int `json:"key"`
 }
 
+/*
+String returns a JSON string representation of the CardanKey.
+
+If JSON string representation fails falls back to fmt.Sprintf formatting.
+*/
 func (cK *CardanKey) String() string {
 	jsonData, err := json.Marshal(cK)
 	if err != nil {
@@ -40,6 +58,18 @@ func getAllRotations(index int, gridSize int) [4]int {
 	return [4]int{index, rotation90, rotation180, rotation270}
 }
 
+/*
+ValidateCardanKey validates that a CardanKey is valid for the given grid size.
+
+It checks if:
+ 1. the key has the correct length
+ 2. all indices are in bounds,
+ 3. there are no duplicates
+ 4. there are no overlaps when rotated
+ 5. all non-center cells are covered.
+
+Returns an error if the key is invalid.
+*/
 func ValidateCardanKey(gridKey *CardanKey, gridSize int) error {
 	if gridSize <= 0 {
 		return fmt.Errorf("invalid gridSize provided: %d", gridSize)
@@ -82,7 +112,7 @@ func ValidateCardanKey(gridKey *CardanKey, gridSize int) error {
 		rotations := getAllRotations(index, gridSize)
 		for _, rotationIndex := range rotations {
 			if _, exists := covered[rotationIndex]; exists {
-				return fmt.Errorf("index overlap! the key is invalid!")
+				return fmt.Errorf("index overlap: the key is invalid")
 			}
 			covered[rotationIndex] = struct{}{}
 		}
@@ -96,6 +126,13 @@ func ValidateCardanKey(gridKey *CardanKey, gridSize int) error {
 	return nil
 }
 
+/*
+GenerateCardanKey generates a random valid CardanKey for the given grid size.
+
+The grid size must be positive.
+
+Returns an error if key generation fails.
+*/
 func GenerateCardanKey(gridSize int) (*CardanKey, error) {
 	if gridSize <= 0 {
 		return nil, fmt.Errorf("invalid gridSize provided: %d", gridSize)
@@ -131,6 +168,19 @@ func cryptoRandN(n int) (int, error) {
 	return int(val.Int64()), nil
 }
 
+/*
+NewCardanCipher creates a new Cardan cipher with the given key and grid size.
+
+The gridSize must be positive.
+
+If gridKey is nil, a random key will be generated.
+
+If gridKey is provided, it will be validated first.
+
+The key is not saved.
+
+Returns an error if gridSize is invalid or the key is invalid.
+*/
 func NewCardanCipher(gridKey *CardanKey, gridSize int) (*CardanCipher, error) {
 	if gridSize <= 0 {
 		return nil, fmt.Errorf("invalid gridSize provided: %d", gridSize)
@@ -170,10 +220,23 @@ func NewCardanCipher(gridKey *CardanKey, gridSize int) (*CardanCipher, error) {
 	}, nil
 }
 
+/*
+IsInPlace returns whether the cipher can perform encryption/decryption in-place.
+
+Cardan cipher does not support in-place operations since bytes are written
+to non-sequential positions, requiring a separate destination buffer.
+*/
 func (cCipher *CardanCipher) IsInPlace() bool {
 	return false
 }
 
+/*
+EncryptBlock encrypts src using the Cardan cipher and writes the result to dst.
+
+src and dst cannot alias.
+
+src and dst must be the same length and must match gridSize*gridSize.
+*/
 func (cCipher *CardanCipher) EncryptBlock(dst []byte, src []byte) error {
 	blockSize := len(cCipher.PermutationTable)
 	if len(src) != blockSize || len(dst) != blockSize {
@@ -187,6 +250,13 @@ func (cCipher *CardanCipher) EncryptBlock(dst []byte, src []byte) error {
 	return nil
 }
 
+/*
+DecryptBlock decrypts src using the Cardan cipher and writes the result to dst.
+
+src and dst cannot alias.
+
+src and dst must be the same length and must match gridSize*gridSize.
+*/
 func (cCipher *CardanCipher) DecryptBlock(dst []byte, src []byte) error {
 	blockSize := len(cCipher.PermutationTable)
 	if len(src) != blockSize || len(dst) != blockSize {
