@@ -11,6 +11,7 @@ func NewVigenereAutoKeyCipher(key []byte) (*VigenereAutoKeyCipher, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &VigenereAutoKeyCipher{VigenereCipher{Key: normalizedKey}}, nil
 }
 

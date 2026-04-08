@@ -13,8 +13,16 @@ func TestNewCaesarCipher(t *testing.T) {
 		key     int
 		wantErr bool
 	}{
-		{name: "valid key", key: 15, wantErr: false},
-		{name: "invalid key", key: -3, wantErr: true},
+		{
+			name:    "valid key",
+			key:     15,
+			wantErr: false,
+		},
+		{
+			name:    "invalid key",
+			key:     -3,
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range keyTests {
@@ -39,13 +47,48 @@ func TestNewCaesarCipher(t *testing.T) {
 		source byte
 		want   byte
 	}{
-		{name: "substitution normal 1", key: 3, source: 'a', want: 'd'},
-		{name: "substitution normal 2", key: 1234, source: 'a', want: 'm'},
-		{name: "substitution case", key: 3, source: 'B', want: 'E'},
-		{name: "substitution no change 1", key: 0, source: 'e', want: 'e'},
-		{name: "substitution no change 2", key: 26, source: 'e', want: 'e'},
-		{name: "substitution non-alpha 1", key: 23, source: ':', want: ':'},
-		{name: "substitution non-alpha 2", key: 23, source: '.', want: '.'},
+		{
+			name:   "substitution normal 1",
+			key:    3,
+			source: 'a',
+			want:   'd',
+		},
+		{
+			name:   "substitution normal 2",
+			key:    1234,
+			source: 'a',
+			want:   'm',
+		},
+		{
+			name:   "substitution case",
+			key:    3,
+			source: 'B',
+			want:   'E',
+		},
+		{
+			name:   "substitution no change 1",
+			key:    0,
+			source: 'e',
+			want:   'e',
+		},
+		{
+			name:   "substitution no change 2",
+			key:    26,
+			source: 'e',
+			want:   'e',
+		},
+		{
+			name:   "substitution non-alpha 1",
+			key:    23,
+			source: ':',
+			want:   ':',
+		},
+		{
+			name:   "substitution non-alpha 2",
+			key:    23,
+			source: '.',
+			want:   '.',
+		},
 	}
 
 	for _, tt := range substitutionTests {
@@ -68,12 +111,42 @@ func TestNewCaesarCipher(t *testing.T) {
 		source byte
 		want   byte
 	}{
-		{name: "reverse normal 2", key: 28, source: 'g', want: 'e'},
-		{name: "reverse normal 1", key: 20, source: 'A', want: 'G'},
-		{name: "reverse no change 1", key: 0, source: 'e', want: 'e'},
-		{name: "reverse no change 2", key: 26, source: 'e', want: 'e'},
-		{name: "reverse non-alpha 1", key: 1234, source: ':', want: ':'},
-		{name: "reverse non-alpha 2", key: 1234, source: ' ', want: ' '},
+		{
+			name:   "reverse normal 2",
+			key:    28,
+			source: 'g',
+			want:   'e',
+		},
+		{
+			name:   "reverse normal 1",
+			key:    20,
+			source: 'A',
+			want:   'G',
+		},
+		{
+			name:   "reverse no change 1",
+			key:    0,
+			source: 'e',
+			want:   'e',
+		},
+		{
+			name:   "reverse no change 2",
+			key:    26,
+			source: 'e',
+			want:   'e',
+		},
+		{
+			name:   "reverse non-alpha 1",
+			key:    1234,
+			source: ':',
+			want:   ':',
+		},
+		{
+			name:   "reverse non-alpha 2",
+			key:    1234,
+			source: ' ',
+			want:   ' ',
+		},
 	}
 
 	for _, tt := range reverseTests {
@@ -325,13 +398,41 @@ func TestCaesarCipher_RoundTrip(t *testing.T) {
 		message string
 		key     int
 	}{
-		{name: "normal 1", message: "Hello World", key: 5},
-		{name: "normal 2", message: "Goodbye Crypto", key: 1234},
-		{name: "normal 3", message: "We Love Kitties", key: 1},
-		{name: "non-alpha", message: "123!!@@%^^ !", key: 1},
-		{name: "no change 1", message: "We Love Kitties", key: 0},
-		{name: "no change 2", message: "We Love Kitties", key: 26},
-		{name: "empty", message: "", key: 15},
+		{
+			name:    "normal 1",
+			message: "Hello World",
+			key:     5,
+		},
+		{
+			name:    "normal 2",
+			message: "Goodbye Crypto",
+			key:     1234,
+		},
+		{
+			name:    "normal 3",
+			message: "We Love Kitties",
+			key:     1,
+		},
+		{
+			name:    "non-alpha",
+			message: "123!!@@%^^ !",
+			key:     1,
+		},
+		{
+			name:    "no change 1",
+			message: "We Love Kitties",
+			key:     0,
+		},
+		{
+			name:    "no change 2",
+			message: "We Love Kitties",
+			key:     26,
+		},
+		{
+			name:    "empty",
+			message: "",
+			key:     15,
+		},
 	}
 
 	for _, tt := range tests {
