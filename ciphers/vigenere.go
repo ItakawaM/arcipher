@@ -99,12 +99,18 @@ func (vCipher *VigenereCipher) EncryptBlock(dst []byte, src []byte) error {
 	for index, char := range src {
 		switch {
 		case char >= 'a' && char <= 'z':
-			dst[index] = (char-'a'+(vCipher.Key[keyIndex%keyCycle]))%26 + 'a'
+			dst[index] = (char-'a'+(vCipher.Key[keyIndex]))%26 + 'a'
 			keyIndex += 1
+			if keyIndex == keyCycle {
+				keyIndex = 0
+			}
 
 		case char >= 'A' && char <= 'Z':
-			dst[index] = (char-'A'+(vCipher.Key[keyIndex%keyCycle]))%26 + 'A'
+			dst[index] = (char-'A'+(vCipher.Key[keyIndex]))%26 + 'A'
 			keyIndex += 1
+			if keyIndex == keyCycle {
+				keyIndex = 0
+			}
 
 		default:
 			dst[index] = char
@@ -133,12 +139,18 @@ func (vCipher *VigenereCipher) DecryptBlock(dst []byte, src []byte) error {
 	for index, char := range src {
 		switch {
 		case char >= 'a' && char <= 'z':
-			dst[index] = (char-'a'-(vCipher.Key[keyIndex%keyCycle])+26)%26 + 'a'
+			dst[index] = (char-'a'-(vCipher.Key[keyIndex])+26)%26 + 'a'
 			keyIndex += 1
+			if keyIndex == keyCycle {
+				keyIndex = 0
+			}
 
 		case char >= 'A' && char <= 'Z':
-			dst[index] = (char-'A'-(vCipher.Key[keyIndex%keyCycle])+26)%26 + 'A'
+			dst[index] = (char-'A'-(vCipher.Key[keyIndex])+26)%26 + 'A'
 			keyIndex += 1
+			if keyIndex == keyCycle {
+				keyIndex = 0
+			}
 
 		default:
 			dst[index] = char
