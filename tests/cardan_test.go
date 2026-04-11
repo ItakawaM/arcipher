@@ -8,30 +8,106 @@ import (
 )
 
 func TestValidateCardanKey(t *testing.T) {
-	validKey4x4 := &ciphers.CardanKey{Key: []int{0, 1, 4, 5}}
-	validKey6x6, _ := ciphers.GenerateCardanKey(6)
-
 	tests := []struct {
 		name     string
 		gridKey  *ciphers.CardanKey
 		gridSize int
 		wantErr  bool
 	}{
-		{"Valid 4x4 Grid Key", validKey4x4, 4, false},
-		{"Valid 6x6 Grid Key", validKey6x6, 6, false},
-		{"Invalid GridSize Zero", &ciphers.CardanKey{Key: []int{0, 1}}, 0, true},
-		{"Invalid GridSize Negative", &ciphers.CardanKey{Key: []int{0, 1}}, -1, true},
-		{"Invalid Key Length Too Short", &ciphers.CardanKey{Key: []int{0}}, 4, true},
-		{"Invalid Key Index Out of Bounds", &ciphers.CardanKey{Key: []int{0, 1, 4, 20}}, 4, true},
-		{"Invalid Duplicate Index", &ciphers.CardanKey{Key: []int{0, 1, 1, 5}}, 4, true},
-		{"Invalid Center Index on Odd Grid", &ciphers.CardanKey{Key: []int{0, 1, 4, 5, 8, 9, 10, 11, 12, 13, 14}}, 5, true},
+		{
+			name: "valid key 1",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1,
+			}},
+			gridSize: 3,
+			wantErr:  false,
+		},
+		{
+			name: "valid key 2",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 10, 8, 11,
+			}},
+			gridSize: 4,
+			wantErr:  false,
+		},
+		{
+			name: "invalid gridsize",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 10, 8, 11, 123, 123, 1562, 31123,
+			}},
+			gridSize: 0,
+			wantErr:  true,
+		},
+		{
+			name: "invalid key length 1",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1, 2,
+			}},
+			gridSize: 3,
+			wantErr:  true,
+		},
+		{
+			name: "invalid key length 2",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1, 2,
+			}},
+			gridSize: 4,
+			wantErr:  true,
+		},
+		{
+			name: "out of bounds key index",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 10,
+			}},
+			gridSize: 3,
+			wantErr:  true,
+		},
+		{
+			name: "key includes center index",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 4,
+			}},
+			gridSize: 3,
+			wantErr:  true,
+		},
+		{
+			name: "key includes duplicate indexes",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1, 4, 4,
+			}},
+			gridSize: 4,
+			wantErr:  true,
+		},
+		{
+			name: "key includes overlapping indexes 1",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 2,
+			}},
+			gridSize: 3,
+			wantErr:  true,
+		},
+		{
+			name: "key includes overlapping indexes 2",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1, 4, 2,
+			}},
+			gridSize: 4,
+			wantErr:  true,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := ciphers.ValidateCardanKey(tt.gridKey, tt.gridSize)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ValidateCardanKey() error = %v, wantErr %v", err, tt.wantErr)
+			gotErr := ciphers.ValidateCardanKey(tt.gridKey, tt.gridSize)
+			if gotErr != nil {
+				if !tt.wantErr {
+					t.Errorf("ValidateCardanKey() failed: %v", gotErr)
+				}
+				return
+			}
+
+			if tt.wantErr {
+				t.Fatal("ValidateCardanKey() succeeded unexpectedly")
 			}
 		})
 	}
@@ -42,71 +118,368 @@ func TestGenerateCardanKey(t *testing.T) {
 		name     string
 		gridSize int
 		wantErr  bool
-		wantLen  int
 	}{
-		{"Valid 2x2", 2, false, 1},
-		{"Valid 4x4", 4, false, 4},
-		{"Valid 6x6", 6, false, 9},
-		{"Valid 8x8", 8, false, 16},
-		{"Invalid Zero", 0, true, 0},
-		{"Invalid Negative", -1, true, 0},
+		{
+			name:     "valid gridsize 1",
+			gridSize: 5,
+			wantErr:  false,
+		},
+		{
+			name:     "valid gridsize 2",
+			gridSize: 6,
+			wantErr:  false,
+		},
+		{
+			name:     "invalid gridsize 1",
+			gridSize: 0,
+			wantErr:  true,
+		},
+		{
+			name:     "invalid gridsize 2",
+			gridSize: -1,
+			wantErr:  true,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			key, err := ciphers.GenerateCardanKey(tt.gridSize)
-			if (err != nil) != tt.wantErr {
-				t.Fatalf("GenerateCardanKey() error = %v, wantErr %v", err, tt.wantErr)
-			}
-			if tt.wantErr {
+			got, gotErr := ciphers.GenerateCardanKey(tt.gridSize)
+			if gotErr != nil {
+				if !tt.wantErr {
+					t.Errorf("GenerateCardanKey() failed: %v", gotErr)
+				}
 				return
 			}
 
-			if key == nil {
-				t.Fatal("Expected non-nil key")
+			if tt.wantErr {
+				t.Fatal("GenerateCardanKey() succeeded unexpectedly")
 			}
 
-			if len(key.Key) != tt.wantLen {
-				t.Errorf("Expected key length %d, got %d", tt.wantLen, len(key.Key))
-			}
-
-			if err := ciphers.ValidateCardanKey(key, tt.gridSize); err != nil {
-				t.Errorf("Generated key is invalid: %v", err)
+			if err := ciphers.ValidateCardanKey(got, tt.gridSize); err != nil {
+				t.Errorf("GenerateCardanKey() = %v, not valid, want something valid", got)
 			}
 		})
 	}
 }
 
-func TestCardanCipher(t *testing.T) {
-	cipher, err := ciphers.NewCardanCipher(nil, 4)
-	if err != nil {
-		t.Fatalf("Failed to create cipher: %v", err)
-	}
-
+func TestNewCardanCipher(t *testing.T) {
 	tests := []struct {
-		name    string
-		message []byte
+		name     string
+		gridKey  *ciphers.CardanKey
+		gridSize int
+		wantErr  bool
 	}{
-		{"Full Block 16 bytes", []byte("HellWorldHelloW!")},
-		{"Single Block Exact", []byte("HellWorldHelloW!")},
+		{
+			name: "valid key and gridsize 1",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1,
+			}},
+			gridSize: 3,
+			wantErr:  false,
+		},
+		{
+			name: "valid key and gridsize 2",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1, 4, 5,
+			}},
+			gridSize: 4,
+			wantErr:  false,
+		},
+		{
+			name: "valid key and invalid gridsize 1",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1, 4, 5,
+			}},
+			gridSize: -1,
+			wantErr:  true,
+		},
+		{
+			name: "valid key and invalid gridsize 2",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1, 4, 5,
+			}},
+			gridSize: 3,
+			wantErr:  true,
+		},
+		{
+			name: "invalid key and invalid gridsize",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1, 4, 5, 10,
+			}},
+			gridSize: 3,
+			wantErr:  true,
+		},
+		{
+			name:     "random key 1",
+			gridKey:  nil,
+			gridSize: 3,
+			wantErr:  false,
+		},
+		{
+			name:     "random key 2",
+			gridKey:  nil,
+			gridSize: 10,
+			wantErr:  false,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			src := tt.message
+			_, gotErr := ciphers.NewCardanCipher(tt.gridKey, tt.gridSize)
+			if gotErr != nil {
+				if !tt.wantErr {
+					t.Errorf("NewCardanCipher() failed: %v", gotErr)
+				}
+				return
+			}
+
+			if tt.wantErr {
+				t.Fatal("NewCardanCipher() succeeded unexpectedly")
+			}
+		})
+	}
+}
+
+func TestCardanCipher_EncryptBlock(t *testing.T) {
+	tests := []struct {
+		name     string
+		gridKey  *ciphers.CardanKey
+		gridSize int
+		dst      []byte
+		src      []byte
+		want     []byte
+		wantErr  bool
+	}{
+		{
+			name: "normal 1",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1,
+			}},
+			gridSize: 3,
+			src:      []byte("ninechars"),
+			dst:      make([]byte, 3*3),
+			want:     []byte("ninaserch"),
+		},
+		{
+			name: "normal 2",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				3, 6, 8, 13,
+			}},
+			gridSize: 4,
+			src:      []byte("mamamylaramurano"),
+			dst:      make([]byte, 16),
+			want:     []byte("rmrmyaaammlnuaoa"),
+		},
+		{
+			name: "dst src size mismatch 1",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1, 4, 5,
+			}},
+			gridSize: 4,
+			src:      []byte("helloworld"),
+			dst:      make([]byte, 3),
+			wantErr:  true,
+		},
+		{
+			name: "dst src size mismatch 2",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1, 4, 5,
+			}},
+			gridSize: 4,
+			src:      []byte("helloworld"),
+			dst:      make([]byte, 16),
+			wantErr:  true,
+		},
+		{
+			name: "dst src size mismatch 3",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1, 4, 5,
+			}},
+			gridSize: 4,
+			src:      []byte("helloworld      "),
+			dst:      make([]byte, 17),
+			wantErr:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ccipher, err := ciphers.NewCardanCipher(tt.gridKey, tt.gridSize)
+			if err != nil {
+				t.Fatalf("could not construct receiver type: %v", err)
+			}
+
+			gotErr := ccipher.EncryptBlock(tt.dst, tt.src)
+			if gotErr != nil {
+				if !tt.wantErr {
+					t.Errorf("EncryptBlock() failed: %v", gotErr)
+				}
+				return
+			}
+
+			if !bytes.Equal(tt.dst, tt.want) {
+				t.Errorf("Encrypt = %q, want %q", (tt.dst), (tt.want))
+			}
+		})
+	}
+}
+
+func TestCardanCipher_DecryptBlock(t *testing.T) {
+	tests := []struct {
+		name     string
+		gridKey  *ciphers.CardanKey
+		gridSize int
+		dst      []byte
+		src      []byte
+		want     []byte
+		wantErr  bool
+	}{
+		{
+			name: "normal 1",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1,
+			}},
+			gridSize: 3,
+			src:      []byte("ninaserch"),
+			dst:      make([]byte, 3*3),
+			want:     []byte("ninechars"),
+		},
+		{
+			name: "normal 2",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				3, 6, 8, 13,
+			}},
+			gridSize: 4,
+			src:      []byte("rmrmyaaammlnuaoa"),
+			dst:      make([]byte, 16),
+			want:     []byte("mamamylaramurano"),
+		},
+		{
+			name: "dst src size mismatch 1",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1, 4, 5,
+			}},
+			gridSize: 4,
+			src:      []byte("helloworld"),
+			dst:      make([]byte, 3),
+			wantErr:  true,
+		},
+		{
+			name: "dst src size mismatch 2",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1, 4, 5,
+			}},
+			gridSize: 4,
+			src:      []byte("helloworld"),
+			dst:      make([]byte, 16),
+			wantErr:  true,
+		},
+		{
+			name: "dst src size mismatch 3",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1, 4, 5,
+			}},
+			gridSize: 4,
+			src:      []byte("helloworld      "),
+			dst:      make([]byte, 17),
+			wantErr:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ccipher, err := ciphers.NewCardanCipher(tt.gridKey, tt.gridSize)
+			if err != nil {
+				t.Fatalf("could not construct receiver type: %v", err)
+			}
+
+			gotErr := ccipher.DecryptBlock(tt.dst, tt.src)
+			if gotErr != nil {
+				if !tt.wantErr {
+					t.Errorf("DecryptBlock() failed: %v", gotErr)
+				}
+				return
+			}
+
+			if tt.wantErr {
+				t.Fatal("DecryptBlock() succeeded unexpectedly")
+			}
+
+			if !bytes.Equal(tt.dst, tt.want) {
+				t.Errorf("DecryptBlock() got %q, want %q", tt.dst, tt.want)
+			}
+		})
+	}
+}
+
+func TestCardanCipher_Rountrip(t *testing.T) {
+	tests := []struct {
+		name     string
+		gridKey  *ciphers.CardanKey
+		gridSize int
+		message  string
+	}{
+		{
+			name: "normal 1",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1,
+			}},
+			gridSize: 3,
+			message:  "hellodoge",
+		},
+		{
+			name: "normal 2",
+			gridKey: &ciphers.CardanKey{Key: []int{
+				0, 1, 2, 5,
+			}},
+			gridSize: 4,
+			message:  "catDogcat1catcat",
+		},
+		{
+			name:     "random 1",
+			gridKey:  nil,
+			gridSize: 2,
+			message:  "abcd",
+		},
+		{
+			name:     "random 2",
+			gridKey:  nil,
+			gridSize: 3,
+			message:  "abcdefghi",
+		},
+		{
+			name:     "random 3",
+			gridKey:  nil,
+			gridSize: 4,
+			message:  "abcdefghiabcdefg",
+		},
+		{
+			name:     "random 4",
+			gridKey:  nil,
+			gridSize: 5,
+			message:  "abcdefghiabcdefgabcdefghi",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ccipher, err := ciphers.NewCardanCipher(tt.gridKey, tt.gridSize)
+			if err != nil {
+				t.Fatalf("could not construct receiver type: %v", err)
+			}
+
+			src := []byte(tt.message)
 			dst := make([]byte, len(src))
-			result := make([]byte, len(src))
 
-			if err := cipher.EncryptBlock(dst, src); err != nil {
-				t.Fatalf("EncryptBlock() error = %v", err)
+			if err := ccipher.EncryptBlock(dst, src); err != nil {
+				t.Fatalf("EncryptBlock() failed: %v", err)
+			}
+			if err := ccipher.DecryptBlock(src, dst); err != nil {
+				t.Fatalf("DecryptBlock() failed: %v", err)
 			}
 
-			if err := cipher.DecryptBlock(result, dst); err != nil {
-				t.Fatalf("DecryptBlock() error = %v", err)
-			}
-
-			if !bytes.Equal(result, src) {
-				t.Errorf("Round trip failed: want %q, got %q", src, result)
+			if string(src) != tt.message {
+				t.Errorf("Roundtrip = %s, want %s", string(src), tt.message)
 			}
 		})
 	}
