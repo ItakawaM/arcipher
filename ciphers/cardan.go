@@ -207,6 +207,7 @@ func NewCardanCipher(gridKey *CardanKey, gridSize int) (*CardanCipher, error) {
 			// Rotate the key in-place
 			sortedKey[j] = rotate90(index, gridSize)
 		}
+		slices.Sort(sortedKey)
 	}
 
 	// Set the last element to center in an odd grid
