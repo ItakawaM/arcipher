@@ -12,18 +12,6 @@ type VigenereCipher struct {
 	Key []byte
 }
 
-func isASCIILetter(char byte) bool {
-	return (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z')
-}
-
-func getShift(k byte) byte {
-	if k >= 'a' && k <= 'z' {
-		return k - 'a'
-	}
-
-	return k - 'A'
-}
-
 /*
 NormalizeVigenereKey normalizes a Vigenere key by converting all letters to lowercase
 and returning only the shift values (a=0, b=1, ..., z=25).
@@ -37,10 +25,10 @@ func NormalizeVigenereKey(key []byte) ([]byte, error) {
 
 	normalizedKey := make([]byte, len(key))
 	for index, char := range key {
-		if !isASCIILetter(char) {
+		if !IsASCIILetter(char) {
 			return nil, fmt.Errorf("key can only consist of ASCII letters")
 		}
-		normalizedKey[index] = getShift(char)
+		normalizedKey[index] = GetShift(char)
 	}
 
 	return normalizedKey, nil

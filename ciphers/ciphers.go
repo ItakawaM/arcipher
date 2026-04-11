@@ -23,6 +23,18 @@ func (mode CipherMode) String() string {
 	return "decrypt"
 }
 
+func IsASCIILetter(char byte) bool {
+	return (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z')
+}
+
+func GetShift(k byte) byte {
+	if k >= 'a' && k <= 'z' {
+		return k - 'a'
+	}
+
+	return k - 'A'
+}
+
 /*
 BlockCipher is the interface that all block ciphers must implement.
 

@@ -68,10 +68,10 @@ func (vCipher *VigenereAutoKeyCipher) EncryptBlock(dst []byte, src []byte) error
 			if keyIndex < keyCycle {
 				dst[index] = (char-'a'+(vCipher.Key[keyIndex]))%26 + 'a'
 			} else {
-				for !isASCIILetter(src[letterIndex]) {
+				for !IsASCIILetter(src[letterIndex]) {
 					letterIndex += 1
 				}
-				dst[index] = (char-'a'+getShift(src[letterIndex]))%26 + 'a'
+				dst[index] = (char-'a'+GetShift(src[letterIndex]))%26 + 'a'
 				letterIndex += 1
 			}
 			keyIndex += 1
@@ -80,10 +80,10 @@ func (vCipher *VigenereAutoKeyCipher) EncryptBlock(dst []byte, src []byte) error
 			if keyIndex < keyCycle {
 				dst[index] = (char-'A'+(vCipher.Key[keyIndex]))%26 + 'A'
 			} else {
-				for !isASCIILetter(src[letterIndex]) {
+				for !IsASCIILetter(src[letterIndex]) {
 					letterIndex += 1
 				}
-				dst[index] = (char-'A'+getShift(src[letterIndex]))%26 + 'A'
+				dst[index] = (char-'A'+GetShift(src[letterIndex]))%26 + 'A'
 				letterIndex += 1
 			}
 			keyIndex += 1
@@ -119,10 +119,10 @@ func (vCipher *VigenereAutoKeyCipher) DecryptBlock(dst []byte, src []byte) error
 			if keyIndex < keyCycle {
 				dst[index] = (char-'a'-(vCipher.Key[keyIndex])+26)%26 + 'a'
 			} else {
-				for !isASCIILetter(src[letterIndex]) {
+				for !IsASCIILetter(src[letterIndex]) {
 					letterIndex += 1
 				}
-				dst[index] = (char-'a'-getShift(dst[letterIndex])+26)%26 + 'a'
+				dst[index] = (char-'a'-GetShift(dst[letterIndex])+26)%26 + 'a'
 				letterIndex += 1
 			}
 			keyIndex += 1
@@ -131,10 +131,10 @@ func (vCipher *VigenereAutoKeyCipher) DecryptBlock(dst []byte, src []byte) error
 			if keyIndex < keyCycle {
 				dst[index] = (char-'A'-(vCipher.Key[keyIndex])+26)%26 + 'A'
 			} else {
-				for !isASCIILetter(src[letterIndex]) {
+				for !IsASCIILetter(src[letterIndex]) {
 					letterIndex += 1
 				}
-				dst[index] = (char-'A'-getShift(dst[letterIndex])+26)%26 + 'A'
+				dst[index] = (char-'A'-GetShift(dst[letterIndex])+26)%26 + 'A'
 				letterIndex += 1
 			}
 			keyIndex += 1
