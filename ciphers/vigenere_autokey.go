@@ -1,4 +1,3 @@
-// Package ciphers provides implementations of various classical and modern encryption ciphers.
 package ciphers
 
 import "fmt"
