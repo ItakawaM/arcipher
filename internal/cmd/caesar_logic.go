@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"text/tabwriter"
 
-	"github.com/ItakawaM/go-cryptotool/ciphers"
-	"github.com/ItakawaM/go-cryptotool/ciphers/analyze"
-	"github.com/ItakawaM/go-cryptotool/internal/benchmark"
-	"github.com/ItakawaM/go-cryptotool/internal/engine"
+	"github.com/ItakawaM/arcipher/ciphers"
+	"github.com/ItakawaM/arcipher/ciphers/analyze"
+	"github.com/ItakawaM/arcipher/internal/benchmark"
+	"github.com/ItakawaM/arcipher/internal/engine"
 	"github.com/spf13/cobra"
 )
 

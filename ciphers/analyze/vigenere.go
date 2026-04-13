@@ -5,7 +5,7 @@ import (
 	"math"
 	"sort"
 
-	"github.com/ItakawaM/go-cryptotool/ciphers"
+	"github.com/ItakawaM/arcipher/ciphers"
 )
 
 /*

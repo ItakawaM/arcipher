@@ -5,7 +5,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/ItakawaM/go-cryptotool/ciphers"
+	"github.com/ItakawaM/arcipher/ciphers"
 )
 
 func TestNewRailFenceCipher(t *testing.T) {

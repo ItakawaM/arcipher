@@ -1,221 +1,250 @@
-# go-cryptotool
+# arcipher
 
-A command-line tool for encrypting and decrypting data using classical cryptographic ciphers, implemented in Go with support for file processing and concurrent operations.
+A Go library and CLI tool for classical cryptography and cryptanalysis. Provides implementations of historical ciphers with file processing and concurrent operations.
 
-## Features
+## Overview
 
-- **Multiple Cipher Support**
-  - Rail Fence (Transposition Cipher)
-  - Caesar Cipher (Substitution Cipher)
+**Library**: Core cipher implementations and cryptanalysis algorithms for use in Go projects.
 
-- **Dual Mode Operation**
-  - Message mode: Encrypt/decrypt strings directly
-  - File mode: Process large files with multi-threaded support
+**CLI**: `arcipher` command-line tool for encrypting, decrypting, and analyzing text and files with support for concurrent block processing.
 
-- **Performance Optimizations**
-  - Concurrent block processing using worker goroutines
-  - Configurable block sizes and thread counts
-  - Performance benchmarking with memory metrics
+### Supported Ciphers
 
-- **Rail Fence Cipher Features**
-  - Zigzag pattern visualization for text mode
-  - Adjustable number of rails
-  - PKCS7 padding for file operations
-
-## Prerequisites
-
-- [Go](https://go.dev) 1.25.5 or later
+| Cipher Name        | Cipher Type                 | Variant       |
+|--------------------|-----------------------------|---------------|
+| Rail Fence         | Permutation                 | —             |
+| Caesar             | Substitution                | —             |
+| Cardan             | Hole Permutation            | —             |
+| Vigenere           | Polyalphabetic Substitution | Autokey (-a)  |
 
 ## Installation
 
-### Build the project
+### Prerequisites
+
+- [Go](https://go.dev) 1.25.5 or later
+
+### As a Library
 
 ```bash
-go build .
+go get github.com/ItakawaM/arcipher
 ```
 
-This creates an executable `go-cryptotool` (or `go-cryptotool.exe` on Windows).
+### As a CLI Tool
 
-## Usage
+**macOS / Linux:**
 
-### Rail Fence Cipher
+```bash
+go build -o arcipher ./cmd/arcipher
+```
 
-#### Encrypt a message
+or
+
+```bash
+make build BINARY=arcipher
+```
+
+**Windows:**
 
 ```powershell
-.\go-cryptotool.exe railfence encrypt 3 "Canabis"
+go build -o arcipher.exe ./cmd/arcipher
 ```
 
-#### Decrypt a message
+or
 
-```powershell
-.\go-cryptotool.exe railfence decrypt 3 "inCasba"
+```bash
+make build
 ```
 
-#### Visualize the cipher pattern
+## CLI Usage
 
-```powershell
-.\go-cryptotool.exe railfence encrypt 3 "Canabis" --print
+**Basic pattern:**
+
+```bash
+arcipher <CIPHER> <ACTION> <ARGS> [FLAGS]
 ```
 
-#### Encrypt a file
+**Getting help:**
 
-```powershell
-.\go-cryptotool.exe railfence encrypt 5 ./input.txt ./output.enc
+```bash
+arcipher <COMMAND> --help
 ```
 
-#### Decrypt a file
+**Verbose output:**
 
-```powershell
-.\go-cryptotool.exe railfence decrypt 5 ./input.enc ./output.txt
+```bash
+arcipher <COMMAND> --verbose
 ```
 
-### Caesar Cipher
+### Railfence
 
-#### Encrypt a message
+#### Message Encryption/Decryption with key 3
 
-```powershell
-.\go-cryptotool.exe caesar encrypt 3 "AttackAtDawn"
+```bash
+arcipher railfence encrypt 3 "helloworld" 
+arcipher railfence decrypt 3 "loelwrdhol"
 ```
 
-#### Decrypt a message
+#### File Encryption/Decryption with key 10 using 4 threads and blocks of size 1024KB and verbose output
 
-```powershell
-.\go-cryptotool.exe caesar decrypt 3 "DwwdfnDwGdzq"
+```bash
+arcipher railfence encrypt 10 ./example/SunPoem ./example/SunPoem.enc --block 1024 --threads 4 -v
+arcipher railfence decrypt 10 ./example/SunPoem.enc ./example/SunPoem --block 1024 --threads 4 -v
 ```
 
-#### Encrypt a file
+### Caesar
 
-```powershell
-.\go-cryptotool.exe caesar encrypt 5 ./input.txt ./output.enc
+#### Message Encryption/Decryption with key 15
+
+```bash
+arcipher caesar encrypt 15 "helloworld"
+arcipher caesar decrypt 15 "wtaadldgas"
 ```
 
-#### Decrypt a file
+#### Message Bruteforce and Frequency Analysis
 
-```powershell
-.\go-cryptotool.exe caesar decrypt 5 ./input.enc ./output.txt
+```bash
+arcipher caesar bruteforce "wtaadldgas"
+arcipher caesar analyze "wtaadldgas"
 ```
 
-## Command Options
+#### File Encryption/Decryption with key 5 using 2 threads and blocks of size 256KB
 
-### Global Options
-
-- `-v, --verbose`: Display additional performance and memory information
-
-### Rail Fence & Caesar Cipher Options
-
-- `-p, --print`: Print zigzag visualization (Rail Fence text mode only)
-- `-b, --block`: Block size in KB (default: 64) — Valid values: 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384
-- `-t, --threads`: Number of threads for file processing (default: CPU cores / 2)
-
-## Project Structure
-
-```
-.
-├── main.go                    # Entry point
-├── go.mod                     # Go module definition
-├── cmd/                       # Command definitions
-│   ├── root.go               # Root command setup
-│   ├── railfence.go          # Rail Fence cipher commands
-│   ├── caesar.go             # Caesar cipher commands
-│   └── cmd.go                # Common command utilities
-├── ciphers/                  # Cipher implementations
-│   ├── ciphers.go            # BlockCipher interface
-│   ├── railfence.go          # Rail Fence implementation
-│   ├── caesar.go             # Caesar implementation
-│   ├── railfence_test.go     # Rail Fence tests & fuzzing
-│   └── padding/
-│       └── pkcs7.go          # PKCS7 padding implementation
-├── engine/                   # File processing engine
-│   ├── fileProcessor.go      # BlockEngine for concurrent processing
-│   └── worker.go             # Worker goroutines
-├── benchmark/                # Performance measurement
-│   └── benchmark.go          # Benchmarking utilities
-└── examples/                 # Example files
-    ├── SunPoem.txt           # Sample plaintext
-    ├── SunPoem.enc           # Sample encrypted file
-    └── generateGarbage.ps1   # Script to generate large test files
+```bash
+arcipher caesar encrypt 5 ./example/SunPoem ./example/SunPoem.enc --block 256 --threads 2
+arcipher caesar decrypt 5 ./example/SunPoem.enc ./example/SunPoem --block 256 --threads 2
 ```
 
-## Architecture
+#### File Bruteforce using 6 threads and blocks of size 2048KB and Frequency Analysis
 
-### Cipher Interface
+```bash
+arcipher caesar bruteforce ./example/SunPoem /example/SunPoem_Directory -t 6 -b 2048
+arcipher caesar analyze ./example/SunPoem
+```
 
-All ciphers implement the `BlockCipher` interface:
+### Cardan
+
+#### Message Encryption/Decryption via interactive browser UI and key export
+
+```bash
+arcipher cardan encrypt "helloworld" --export key.json
+arcipher cardan decrypt "h lowd e ol  lr "
+```
+
+#### Message Encryption/Decryption with exported/generated key
+
+```bash
+arcipher cardan encrypt ./key.json "helloworld"
+arcipher cardan decrypt ./key.json "h lowd e ol  lr "
+```
+
+#### Generate a key for a 5x5 grid
+
+```bash
+arcipher cardan generate-key 5 key.json
+```
+
+#### File Encryption/Decryption with key and 4 threads
+
+```bash
+arcipher cardan encrypt key.json ./example/SunPoem ./example/SunPoem.enc --threads 4 -v
+arcipher cardan decrypt key.json ./example/SunPoem.enc ./example/SunPoem --threads 4 -v
+```
+
+### Vigenere
+
+#### Message Encryption/Decryption with key "Secret"
+
+```bash
+arcipher vigenere encrypt "Secret" "helloworld"
+arcipher vigenere decrypt "Secret" "zincspgvnu"
+```
+
+#### Message Dictionary Bruteforce and Kasiski-Frequency Analysis
+
+```bash
+arcipher vigenere bruteforce ./example/dict.txt "zincspgvnu"
+arcipher vigenere analyze "zincspgvnu"
+```
+
+#### File Encryption/Decryption with key "Keyword" using 4 threads and blocks of size 512KB
+
+```bash
+arcipher vigenere encrypt "Keyword" ./example/SunPoem ./example/SunPoem.enc --block 512 --threads 4
+arcipher vigenere decrypt "Keyword" ./example/SunPoem.enc ./example/SunPoem --block 512 --threads 4
+```
+
+#### File Dictionary Bruteforce using 4 threads and Kasiski-Frequency Analysis
+
+```bash
+arcipher vigenere bruteforce ./example/dict.txt ./example/SunPoem /example/SunPoem_Directory --threads 4
+arcipher vigenere analyze ./example/SunPoem.enc
+```
+
+#### Message Encryption/Decryption with Autokey variant using `-a` flag
+
+```bash
+arcipher vigenere encrypt "Secret" "helloworld" -a
+arcipher vigenere decrypt "Secret" "zincspvvwo" -a
+```
+
+#### File Encryption/Decryption with Autokey variant using 4 threads
+
+```bash
+arcipher vigenere encrypt "Keyword" ./example/SunPoem ./example/SunPoem.enc --block 512 --threads 4 -a
+arcipher vigenere decrypt "Keyword" ./example/SunPoem.enc ./example/SunPoem --block 512 --threads 4 -a
+```
+
+### Library Usage
 
 ```go
-type BlockCipher interface {
-    IsInPlace() bool
-    EncryptBlock(dst []byte, src []byte) error
-    DecryptBlock(dst []byte, src []byte) error
+package main
+
+import "github.com/ItakawaM/arcipher/ciphers"
+
+func main() {
+ // Create and use a cipher
+ cipher, err := ciphers.NewCaesarCipher(12)
+ if err != nil {
+  // Process error
+ }
+
+ // Create source and destination buffers
+ src := []byte("HelloWorld")
+ dst := make([]byte, len(src))
+
+ // Perform action
+ if err := cipher.EncryptBlock(dst, src); err != nil {
+  // Process error
+ }
+
+ // Alternatively, you can alias buffers if the desired cipher allows it
+ if cipher.IsInPlace() {
+  if err := cipher.EncryptBlock(src, src); err != nil {
+   // Process error
+  }
+ }
 }
+
 ```
 
-### File Processing
+## Options
 
-The `BlockEngine` handles concurrent file encryption/decryption:
-
-- Splits files into configurable blocks
-- Distributes blocks to worker goroutines
-- Applies PKCS7 padding to the last block
-- Supports both in-place and separate source/destination ciphers
-
-### Worker Model
-
-`Worker` goroutines process blocks concurrently:
-
-- Read block from input file
-- Apply encryption/decryption
-- Write block to output file
-- Report errors through a shared channel
+- `-v, --verbose` — Show performance metrics
+- `-b, --block` — Block size in KB for file processing (default: 64)
+- `-t, --threads` — Worker threads for file processing (default: CPU cores / 2)
 
 ## Testing
 
-Run the test suite:
+```bash
+go test ./tests/...
+```
+
+or
 
 ```bash
-go test ./...
+make test
 ```
-
-### Rail Fence Tests
-
-The project includes:
-
-- Unit tests for encryption/decryption
-- Round-trip tests (encrypt → decrypt)
-- Fuzz testing for robustness
-
-## Performance Considerations
-
-- **Block Size**: Larger blocks improve throughput but increase memory usage
-- **Thread Count**: Optimal typically matches CPU core count; defaults to CPU cores / 2
-- **In-Place Ciphers**: Caesar cipher is in-place (single buffer); Rail Fence uses separate buffers
-
-Use the `--verbose` flag to see performance metrics:
-
-```powershell
-.\go-cryptotool.exe railfence encrypt 3 "LargeMessage" --verbose
-```
-
-## Limitations
-
-- Rail Fence cipher: Keys ≥ block size result in simple reversal
-- Caesar cipher: Only shifts alphabetic characters (A-Z, a-z)
-- PKCS7 padding: Fixed 4-byte length field
-- Single-layer encryption: No chaining modes
-
-## Dependencies
-
-- [Cobra](https://github.com/spf13/cobra) v1.10.2 — Command-line framework
 
 ## License
 
-This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.
-
-## Author
-
-ItakawaM
-
----
-
-**Status**: Work In Progress
+MIT License — see [LICENSE](LICENSE)

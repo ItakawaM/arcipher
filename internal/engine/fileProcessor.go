@@ -5,8 +5,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/ItakawaM/go-cryptotool/ciphers"
-	"github.com/ItakawaM/go-cryptotool/ciphers/padding"
+	"github.com/ItakawaM/arcipher/ciphers"
+	"github.com/ItakawaM/arcipher/ciphers/padding"
 )
 
 type BlockEngine struct {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/ItakawaM/go-cryptotool/ciphers"
+	"github.com/ItakawaM/arcipher/ciphers"
 )
 
 type railFenceFactory struct {

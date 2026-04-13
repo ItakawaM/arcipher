@@ -10,10 +10,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ItakawaM/go-cryptotool/ciphers"
-	"github.com/ItakawaM/go-cryptotool/internal/benchmark"
-	"github.com/ItakawaM/go-cryptotool/internal/engine"
-	"github.com/ItakawaM/go-cryptotool/internal/server"
+	"github.com/ItakawaM/arcipher/ciphers"
+	"github.com/ItakawaM/arcipher/internal/benchmark"
+	"github.com/ItakawaM/arcipher/internal/engine"
+	"github.com/ItakawaM/arcipher/internal/server"
 	"github.com/spf13/cobra"
 )
 

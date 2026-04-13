@@ -3,7 +3,7 @@ package cmd
 import (
 	"runtime"
 
-	"github.com/ItakawaM/go-cryptotool/ciphers"
+	"github.com/ItakawaM/arcipher/ciphers"
 	"github.com/spf13/cobra"
 )
 
@@ -58,13 +58,13 @@ a key must be supplied as a JSON file (see the key generation command).
 Examples:
 
   Encrypt text (interactive key selection):
-    1. go-cryptotool cardan encrypt "HELLO WORLD"
+    1. arcipher cardan encrypt "HELLO WORLD"
 
   Encrypt text with a key:
-    1. go-cryptotool cardan encrypt key.json "HELLO WORLD"
+    1. arcipher cardan encrypt key.json "HELLO WORLD"
 
   Encrypt a file:
-    1. go-cryptotool cardan encrypt key.json file.txt file.enc
+    1. arcipher cardan encrypt key.json file.txt file.enc
 
 Notes:
 
@@ -108,10 +108,10 @@ generation command).
 Examples:
 
   Decrypt text:
-    1. go-cryptotool cardan decrypt key.json "ENCRYPTEDTEXT"
+    1. arcipher cardan decrypt key.json "ENCRYPTEDTEXT"
 
   Decrypt a file:
-    1. go-cryptotool cardan decrypt key.json file.enc file.txt
+    1. arcipher cardan decrypt key.json file.enc file.txt
 
 Notes:
 
@@ -155,10 +155,10 @@ encrypt and decrypt commands.
 Examples:
 
   Generate a key for a 4x4 grid:
-    1. go-cryptotool cardan generate-key 4 key4.json
+    1. arcipher cardan generate-key 4 key4.json
 
   Generate a key for a 5x5 grid:
-    1. go-cryptotool cardan generate-key 5 key5.json
+    1. arcipher cardan generate-key 5 key5.json
 
 Notes:
 

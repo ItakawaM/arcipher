@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/ItakawaM/go-cryptotool/ciphers"
+	"github.com/ItakawaM/arcipher/ciphers"
 	"github.com/spf13/cobra"
 )
 
@@ -41,10 +41,10 @@ A shift of 0 results in no transformation.
 Examples:
 
   Encrypt text:
-    1. go-cryptotool caesar encrypt 3 "AttackAtDawn"
+    1. arcipher caesar encrypt 3 "AttackAtDawn"
 
   Encrypt a file:
-    1. go-cryptotool caesar encrypt 5 file.txt file.enc
+    1. arcipher caesar encrypt 5 file.txt file.enc
 
 Notes:
 
@@ -80,10 +80,10 @@ A shift of 0 results in no transformation.
 Examples:
 
   Decrypt text:
-    1. go-cryptotool caesar decrypt 3 "DwwdfnDwGdzq"
+    1. arcipher caesar decrypt 3 "DwwdfnDwGdzq"
 
   Decrypt a file:
-    1. go-cryptotool caesar decrypt 5 file.enc file.txt
+    1. arcipher caesar decrypt 5 file.enc file.txt
 
 Notes:
 
@@ -118,10 +118,10 @@ This is useful when the original shift key is unknown.
 Examples:
 
   Bruteforce text:
-    1. go-cryptotool caesar bruteforce "DwwdfnDwGdzq"
+    1. arcipher caesar bruteforce "DwwdfnDwGdzq"
 
   Bruteforce a file:
-    1. go-cryptotool caesar bruteforce file.enc output_directory
+    1. arcipher caesar bruteforce file.enc output_directory
 
 Notes:
 
@@ -159,10 +159,10 @@ Non-alphabetic characters remain unchanged during analysis.
 Examples:
 
   Analyze text:
-    1. go-cryptotool caesar analyze "DwwdfnDwGdzq"
+    1. arcipher caesar analyze "DwwdfnDwGdzq"
 
   Analyze a file:
-    1. go-cryptotool caesar analyze file.enc
+    1. arcipher caesar analyze file.enc
 
 Notes:
 

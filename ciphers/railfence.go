@@ -7,6 +7,17 @@ RailFenceCipher is a transposition cipher that writes plaintext in a zigzag patt
 across a number of "rails" and then reads off row by row.
 
 The key specifies the number of rails to use.
+
+Example:
+
+	Key:        3
+	Plaintext:  HelloWorld
+	----------------------
+	  l   o
+	 e l w r d
+	H   o   l
+	----------------------
+	Ciphertext: loelwrdHol
 */
 type RailFenceCipher struct {
 	Key              int

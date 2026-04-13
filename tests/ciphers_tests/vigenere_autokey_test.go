@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/ItakawaM/go-cryptotool/ciphers"
+	"github.com/ItakawaM/arcipher/ciphers"
 )
 
 func TestVigenereAutoKeyCipher_EncryptBlock(t *testing.T) {

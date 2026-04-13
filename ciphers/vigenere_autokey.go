@@ -6,6 +6,17 @@ import "fmt"
 VigenereAutoKeyCipher is a variant of the Vigenere cipher that uses the plaintext
 itself (after the key) as the key for subsequent encryptions, providing
 stronger security than the standard Vigenere cipher.
+
+Example:
+
+	Key:        Cat
+	Plaintext:  HelloWorld
+	---------------------
+	+H e l l o W o r l d
+	 C a t H e l l o W o
+	 J e e s s H z f h r
+	---------------------
+	Ciphertext: JeessHzfhr
 */
 type VigenereAutoKeyCipher struct {
 	VigenereCipher

@@ -8,6 +8,17 @@ import (
 CaesarCipher is a substitution cipher that shifts letters by a fixed key.
 
 It uses precomputed substitution and reverse tables for efficient encryption/decryption.
+
+Example:
+
+	Key:        3
+	Plaintext:  Hello
+	-----------------
+	+H e l l o
+	 3 3 3 3 3
+	 K h o o r
+	-----------------
+	Ciphertext: Khoor
 */
 type CaesarCipher struct {
 	Key               byte

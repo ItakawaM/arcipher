@@ -7,7 +7,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "go-cryptotool",
+	Use:   "arcipher",
 	Short: "Classic encryption ciphers in Go!",
 	Long: `ItakawaM
 	

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/ItakawaM/go-cryptotool/ciphers"
+	"github.com/ItakawaM/arcipher/ciphers"
 	"github.com/spf13/cobra"
 )
 
@@ -38,10 +38,10 @@ A key of 1 results in no transformation.
 Examples:
 
   Encrypt text:
-    1. go-cryptotool railfence encrypt 3 "Canabis"
+    1. arcipher railfence encrypt 3 "Canabis"
   
   Encrypt a file:
-    1. go-cryptotool railfence encrypt 5 file.txt file.enc
+    1. arcipher railfence encrypt 5 file.txt file.enc
 
 Notes:
 
@@ -73,10 +73,10 @@ using a specified number of rails (key).
 Examples:
 
   Decrypt text:
-    1. go-cryptotool railfence decrypt 3 "nsaaiCb"
+    1. arcipher railfence decrypt 3 "nsaaiCb"
   
   Decrypt a file:
-    1. go-cryptotool railfence decrypt 5 file.enc file.txt
+    1. arcipher railfence decrypt 5 file.enc file.txt
 
 Notes:
 

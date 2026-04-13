@@ -6,6 +6,16 @@ import "fmt"
 VigenereCipher is a polyalphabetic substitution cipher that uses a keyword
 to encrypt messages by shifting each letter by a different amount based on
 the corresponding letter in the key.
+
+Example:
+	Key:        Cat
+	Plaintext:  HelloWorld
+	---------------------
+	+H e l l o W o r l d
+	 C a t C a t C a t C
+	 J e e n o P q r e f
+	---------------------
+	Ciphertext: JeenoPqref
 */
 type VigenereCipher struct {
 	Key []byte

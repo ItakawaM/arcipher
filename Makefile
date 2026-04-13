@@ -1,12 +1,12 @@
-BINARY ?= go-cryptotool.exe
+BINARY ?= arcipher.exe
 
 .PHONY: run build clean test help
 
 run:
-	go run ./cmd/go-cryptotool/main.go
+	go run ./cmd/arcipher/main.go
 
 build:
-	go build -o $(BINARY) ./cmd/go-cryptotool/main.go 
+	go build -o $(BINARY) ./cmd/arcipher/main.go 
 
 clean:
 	rm -f ./$(BINARY)

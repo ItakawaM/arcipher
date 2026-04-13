@@ -5,7 +5,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/ItakawaM/go-cryptotool/ciphers"
+	"github.com/ItakawaM/arcipher/ciphers"
 )
 
 type Job struct {

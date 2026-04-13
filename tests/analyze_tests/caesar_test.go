@@ -3,8 +3,8 @@ package analyze_test
 import (
 	"testing"
 
-	"github.com/ItakawaM/go-cryptotool/ciphers"
-	"github.com/ItakawaM/go-cryptotool/ciphers/analyze"
+	"github.com/ItakawaM/arcipher/ciphers"
+	"github.com/ItakawaM/arcipher/ciphers/analyze"
 )
 
 func TestCaesarAnalyzer_AnalyzeBuffer(t *testing.T) {

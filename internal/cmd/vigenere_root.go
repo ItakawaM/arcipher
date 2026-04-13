@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/ItakawaM/go-cryptotool/ciphers"
+	"github.com/ItakawaM/arcipher/ciphers"
 	"github.com/spf13/cobra"
 )
 
@@ -44,10 +44,10 @@ consume characters from the keyword.
 Examples:
 
   Encrypt text:
-    1. go-cryptotool vigenere encrypt KEY "AttackAtDawn"
+    1. arcipher vigenere encrypt KEY "AttackAtDawn"
 
   Encrypt a file:
-    1. go-cryptotool vigenere encrypt SECRET file.txt file.enc
+    1. arcipher vigenere encrypt SECRET file.txt file.enc
 
 Notes:
 
@@ -85,10 +85,10 @@ consume characters from the keyword.
 Examples:
 
   Decrypt text:
-    1. go-cryptotool vigenere decrypt KEY "KxrkgiKxBkal"
+    1. arcipher vigenere decrypt KEY "KxrkgiKxBkal"
 
   Decrypt a file:
-    1. go-cryptotool vigenere decrypt SECRET file.enc file.txt
+    1. arcipher vigenere decrypt SECRET file.enc file.txt
 
 Notes:
 
@@ -126,10 +126,10 @@ Non-alphabetic characters remain unchanged.
 Examples:
 
   Bruteforce text using a wordlist:
-    1. go-cryptotool vigenere bruteforce wordlist.txt "LxfopvEfRnhr"
+    1. arcipher vigenere bruteforce wordlist.txt "LxfopvEfRnhr"
 
   Bruteforce a file:
-    1. go-cryptotool vigenere bruteforce wordlist.txt file.enc output_directory
+    1. arcipher vigenere bruteforce wordlist.txt file.enc output_directory
 
 Notes:
 
@@ -167,10 +167,10 @@ each segment of the ciphertext to recover the most likely key.
 Examples:
 
   Analyze ciphertext from input text:
-    1. go-cryptotool vigenere analyze "SOMETEXTHERE"
+    1. arcipher vigenere analyze "SOMETEXTHERE"
 
   Analyze a file:
-    1. go-cryptotool vigenere analyze file.enc
+    1. arcipher vigenere analyze file.enc
 
 Notes:
 
