@@ -1,4 +1,8 @@
-# arcipher
+# arcipher [![Go Reference](https://pkg.go.dev/badge/github.com/ItakawaM/arcipher.svg)](https://pkg.go.dev/github.com/ItakawaM/arcipher)
+
+<p align="center">
+  <img src="gopher.png" alt="arcipher logo" width="400"/>
+</p>
 
 A Go library and CLI tool for classical cryptography and cryptanalysis. Provides implementations of historical ciphers with file processing and concurrent operations.
 
@@ -53,6 +57,39 @@ or
 
 ```bash
 make build
+```
+
+## Library Usage
+
+```go
+package main
+
+import "github.com/ItakawaM/arcipher/ciphers"
+
+func main() {
+ // Create a new cipher
+ cipher, err := ciphers.NewCaesarCipher(12)
+ if err != nil {
+  // Process error
+ }
+
+ // Create source and destination buffers
+ src := []byte("HelloWorld")
+ dst := make([]byte, len(src))
+
+ // Perform action
+ if err := cipher.EncryptBlock(dst, src); err != nil {
+  // Process error
+ }
+
+ // Alternatively, you can alias buffers if the desired cipher allows it
+ if cipher.IsInPlace() {
+  if err := cipher.EncryptBlock(src, src); err != nil {
+   // Process error
+  }
+ }
+}
+
 ```
 
 ## CLI Usage
@@ -192,39 +229,6 @@ arcipher vigenere decrypt "Secret" "zincspvvwo" -a
 ```bash
 arcipher vigenere encrypt "Keyword" ./example/SunPoem ./example/SunPoem.enc --block 512 --threads 4 -a
 arcipher vigenere decrypt "Keyword" ./example/SunPoem.enc ./example/SunPoem --block 512 --threads 4 -a
-```
-
-### Library Usage
-
-```go
-package main
-
-import "github.com/ItakawaM/arcipher/ciphers"
-
-func main() {
- // Create and use a cipher
- cipher, err := ciphers.NewCaesarCipher(12)
- if err != nil {
-  // Process error
- }
-
- // Create source and destination buffers
- src := []byte("HelloWorld")
- dst := make([]byte, len(src))
-
- // Perform action
- if err := cipher.EncryptBlock(dst, src); err != nil {
-  // Process error
- }
-
- // Alternatively, you can alias buffers if the desired cipher allows it
- if cipher.IsInPlace() {
-  if err := cipher.EncryptBlock(src, src); err != nil {
-   // Process error
-  }
- }
-}
-
 ```
 
 ## Options

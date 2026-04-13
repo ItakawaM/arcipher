@@ -11,20 +11,13 @@ func NewCardanCommand() *cobra.Command {
 	cardanCmd := &cobra.Command{
 		Use:   "cardan",
 		Short: "Encrypt or decrypt data using the Cardan grille cipher",
-		Long: `The Cardan grille is a classical steganographic cipher that uses
+		Long: `The Cardan grille is a classical permutation cipher that uses
 a stencil (grille) with holes cut into it. The grille is placed
-over a grid, and the plaintext is written through the holes.
+over a grid, and the text is written through the holes.
 
 After writing the letters, the grille is rotated (usually by
 90 degrees) several times, filling the exposed positions each
-time until the grid is complete. The final filled grid becomes
-the ciphertext.
-
-To decrypt the message, the same grille and rotation order
-must be used to reveal the hidden plaintext.
-
-This command allows encryption and decryption of messages or
-files using a specified grille pattern and grid size.
+time until the grid is complete.
 `,
 	}
 	cardanCmd.AddCommand(
@@ -45,26 +38,20 @@ func newCardanEncryptCommand() *cobra.Command {
 		Args:  cobra.RangeArgs(1, 3),
 		Long: `Encrypt messages or files using the Cardan grille cipher.
 
-The Cardan cipher uses a square grille (key) containing holes that
-reveal positions in a message grid. Plaintext is written through these
-holes, and the grille is rotated (typically four times at 90°) so that
-each rotation exposes different cells. Once the grid is filled, the
-ciphertext is produced by reading the grid sequentially.
-
 If no key is provided for text encryption, a browser interface will
 open to allow interactive grille selection. For file encryption,
 a key must be supplied as a JSON file (see the key generation command).
 
 Examples:
 
-  Encrypt text (interactive key selection):
-    1. arcipher cardan encrypt "HELLO WORLD"
+  Encrypt text with interactive browser UI and export key:
+    arcipher cardan encrypt "helloworld" --export key.json
 
-  Encrypt text with a key:
-    1. arcipher cardan encrypt key.json "HELLO WORLD"
+  Encrypt text with exported/generated key:
+    arcipher cardan encrypt ./key.json "helloworld"
 
-  Encrypt a file:
-    1. arcipher cardan encrypt key.json file.txt file.enc
+  Encrypt a file with key and 4 threads:
+    arcipher cardan encrypt key.json ./example/SunPoem ./example/SunPoem.enc --threads 4 -v
 
 Notes:
 
@@ -95,23 +82,20 @@ func newCardanDecryptCommand() *cobra.Command {
 		Args:  cobra.RangeArgs(1, 3),
 		Long: `Decrypt messages or files that were encrypted using the Cardan grille cipher.
 
-The Cardan cipher uses a square grille (key) containing holes that
-reveal positions in a message grid. During decryption, the ciphertext
-is written into the grid and the grille is applied in the same rotation
-sequence (typically four 90° rotations). Characters revealed through
-the grille holes are read in order to reconstruct the original plaintext.
-
 A key must be provided for decryption and should match the one used
 during encryption. Keys are supplied as JSON files (see the key
 generation command).
 
 Examples:
 
-  Decrypt text:
-    1. arcipher cardan decrypt key.json "ENCRYPTEDTEXT"
+  Decrypt text with interactive browser UI and export key:
+    arcipher cardan encrypt "h lowd e ol  lr " --export key.json
 
-  Decrypt a file:
-    1. arcipher cardan decrypt key.json file.enc file.txt
+  Decrypt text with key:
+    arcipher cardan decrypt ./key.json "h lowd e ol  lr "
+
+  Decrypt a file with key and 4 threads:
+    arcipher cardan decrypt key.json ./example/SunPoem.enc ./example/SunPoem --threads 4 -v
 
 Notes:
 
@@ -142,23 +126,15 @@ func newCardanGenerateKeyCommand() *cobra.Command {
 		Args:  cobra.ExactArgs(2),
 		Long: `Generate a valid Cardan grille key for use with the Cardan cipher.
 
-The Cardan cipher requires a square grille containing holes that reveal
-positions in a message grid. During encryption and decryption, the grille
-is rotated (typically four times at 90°), and each rotation must expose
-different cells of the grid.
-
 This command generates a grille where the hole positions are arranged so
 that every cell of the grid is covered exactly once across all rotations.
-The generated key is saved as a JSON file and can later used with the
+The generated key is saved as a JSON file and can later be used with the
 encrypt and decrypt commands.
 
 Examples:
 
-  Generate a key for a 4x4 grid:
-    1. arcipher cardan generate-key 4 key4.json
-
   Generate a key for a 5x5 grid:
-    1. arcipher cardan generate-key 5 key5.json
+    arcipher cardan generate-key 5 key.json
 
 Notes:
 

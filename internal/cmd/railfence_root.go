@@ -37,11 +37,11 @@ A key of 1 results in no transformation.
 
 Examples:
 
-  Encrypt text:
-    1. arcipher railfence encrypt 3 "Canabis"
-  
-  Encrypt a file:
-    1. arcipher railfence encrypt 5 file.txt file.enc
+  Encrypt text with key 3:
+    arcipher railfence encrypt 3 "helloworld"
+
+  Encrypt a file with key 10 using 4 threads and blocks of 1024KB:
+    arcipher railfence encrypt 10 ./example/SunPoem ./example/SunPoem.enc --block 1024 --threads 4 -v
 
 Notes:
 
@@ -72,11 +72,11 @@ using a specified number of rails (key).
 
 Examples:
 
-  Decrypt text:
-    1. arcipher railfence decrypt 3 "nsaaiCb"
-  
-  Decrypt a file:
-    1. arcipher railfence decrypt 5 file.enc file.txt
+  Decrypt text with key 3:
+    arcipher railfence decrypt 3 "loelwrdhol"
+
+  Decrypt a file with key 10 using 4 threads and blocks of 1024KB:
+    arcipher railfence decrypt 10 ./example/SunPoem.enc ./example/SunPoem --block 1024 --threads 4 -v
 
 Notes:
 

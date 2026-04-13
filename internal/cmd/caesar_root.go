@@ -40,11 +40,11 @@ A shift of 0 results in no transformation.
 
 Examples:
 
-  Encrypt text:
-    1. arcipher caesar encrypt 3 "AttackAtDawn"
+  Encrypt text with key 15:
+    arcipher caesar encrypt 15 "helloworld"
 
-  Encrypt a file:
-    1. arcipher caesar encrypt 5 file.txt file.enc
+  Encrypt a file with key 5 using 2 threads and blocks of 256KB:
+    arcipher caesar encrypt 5 ./example/SunPoem ./example/SunPoem.enc --block 256 --threads 2
 
 Notes:
 
@@ -79,11 +79,11 @@ A shift of 0 results in no transformation.
 
 Examples:
 
-  Decrypt text:
-    1. arcipher caesar decrypt 3 "DwwdfnDwGdzq"
+  Decrypt text with key 15:
+    arcipher caesar decrypt 15 "wtaadldgas"
 
-  Decrypt a file:
-    1. arcipher caesar decrypt 5 file.enc file.txt
+  Decrypt a file with key 5 using 2 threads and blocks of 256KB:
+    arcipher caesar decrypt 5 ./example/SunPoem.enc ./example/SunPoem --block 256 --threads 2
 
 Notes:
 
@@ -118,10 +118,10 @@ This is useful when the original shift key is unknown.
 Examples:
 
   Bruteforce text:
-    1. arcipher caesar bruteforce "DwwdfnDwGdzq"
+    arcipher caesar bruteforce "wtaadldgas"
 
-  Bruteforce a file:
-    1. arcipher caesar bruteforce file.enc output_directory
+  Bruteforce a file using 6 threads and blocks of 2048KB:
+    arcipher caesar bruteforce ./example/SunPoem ./example/SunPoem_Directory -t 6 -b 2048
 
 Notes:
 
@@ -159,10 +159,10 @@ Non-alphabetic characters remain unchanged during analysis.
 Examples:
 
   Analyze text:
-    1. arcipher caesar analyze "DwwdfnDwGdzq"
+    arcipher caesar analyze "wtaadldgas"
 
   Analyze a file:
-    1. arcipher caesar analyze file.enc
+    arcipher caesar analyze ./example/SunPoem
 
 Notes:
 

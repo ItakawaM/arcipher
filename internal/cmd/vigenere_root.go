@@ -43,11 +43,14 @@ consume characters from the keyword.
 
 Examples:
 
-  Encrypt text:
-    1. arcipher vigenere encrypt KEY "AttackAtDawn"
+  Encrypt text with key "Secret":
+    arcipher vigenere encrypt "Secret" "helloworld"
 
-  Encrypt a file:
-    1. arcipher vigenere encrypt SECRET file.txt file.enc
+  Encrypt a file with key "Keyword" using 4 threads and blocks of 512KB:
+    arcipher vigenere encrypt "Keyword" ./example/SunPoem ./example/SunPoem.enc --block 512 --threads 4
+
+  Encrypt with Autokey variant:
+    arcipher vigenere encrypt "Secret" "helloworld" -a
 
 Notes:
 
@@ -84,11 +87,14 @@ consume characters from the keyword.
 
 Examples:
 
-  Decrypt text:
-    1. arcipher vigenere decrypt KEY "KxrkgiKxBkal"
+  Decrypt text with key "Secret":
+    arcipher vigenere decrypt "Secret" "zincspgvnu"
 
-  Decrypt a file:
-    1. arcipher vigenere decrypt SECRET file.enc file.txt
+  Decrypt a file with key "Keyword" using 4 threads and blocks of 512KB:
+    arcipher vigenere decrypt "Keyword" ./example/SunPoem.enc ./example/SunPoem --block 512 --threads 4
+
+  Decrypt with Autokey variant:
+    arcipher vigenere decrypt "Secret" "zincspvvwo" -a
 
 Notes:
 
@@ -125,11 +131,11 @@ Non-alphabetic characters remain unchanged.
 
 Examples:
 
-  Bruteforce text using a wordlist:
-    1. arcipher vigenere bruteforce wordlist.txt "LxfopvEfRnhr"
+  Bruteforce text using a dictionary:
+    arcipher vigenere bruteforce ./example/dict.txt "zincspgvnu"
 
-  Bruteforce a file:
-    1. arcipher vigenere bruteforce wordlist.txt file.enc output_directory
+  Bruteforce a file using 4 threads:
+    arcipher vigenere bruteforce ./example/dict.txt ./example/SunPoem ./example/SunPoem_Directory --threads 4
 
 Notes:
 
@@ -166,11 +172,11 @@ each segment of the ciphertext to recover the most likely key.
 
 Examples:
 
-  Analyze ciphertext from input text:
-    1. arcipher vigenere analyze "SOMETEXTHERE"
+  Analyze text with Kasiski-Frequency analysis:
+    arcipher vigenere analyze "zincspgvnu"
 
   Analyze a file:
-    1. arcipher vigenere analyze file.enc
+    arcipher vigenere analyze ./example/SunPoem.enc
 
 Notes:
 
