@@ -25,10 +25,19 @@ type HillCipher struct {
 }
 
 /*
+HillKey represents the key for a Hill cipher.
+
+It contains a square matrix.
+*/
+type HillKey struct {
+	Key [][]int `json:"key"`
+}
+
+/*
 Key returns the cipher's Key Matrix.
 */
-func (hc *HillCipher) Key() mathutils.Matrix[int] {
-	return *hc.key
+func (hc *HillCipher) Key() HillKey {
+	return HillKey{hc.key.Data}
 }
 
 /*
@@ -36,8 +45,8 @@ InverseKey returns the inverse matrix to cipher's Key Matrix, such so:
 
 Key x Inverse = Identity Matrix
 */
-func (hc *HillCipher) InverseKey() mathutils.Matrix[int] {
-	return *hc.inverseKey
+func (hc *HillCipher) InverseKey() HillKey {
+	return HillKey{hc.inverseKey.Data}
 }
 
 func crtCombine(numberA int, numberB int) int {
@@ -53,6 +62,44 @@ func crtCombine(numberA int, numberB int) int {
 }
 
 /*
+GenerateHillKey generates a random invertible key matrix for the Hill cipher.
+
+The size parameter specifies the dimensions of the key matrix (NxN). The function generates
+random matrices until it finds one that is invertible modulo 26.
+
+O(random) Time Complexity.
+
+Returns an error if size <= 1.
+*/
+func GenerateHillKey(size int) (*HillKey, error) {
+	if size <= 1 {
+		return nil, fmt.Errorf("size must be > 1, got size = %d", size)
+	}
+	matrix, _ := mathutils.NewMatrixZero[int](size, size) // Can't fail, because rows and columns are checked earlier
+
+	// Just try until it works
+	// Most likely the most random-random matrix generator there is
+	for {
+		sequence, err := RandSequenceIntMaxN(26, size*size)
+		if err != nil {
+			return nil, err
+		}
+
+		for i := range size {
+			for j := range size {
+				matrix.Data[i][j] = <-sequence
+			}
+		}
+
+		cipher, err := NewHillCipher(&HillKey{Key: matrix.Data})
+		if err == nil {
+			key := cipher.Key()
+			return &key, nil
+		}
+	}
+}
+
+/*
 NewHillCipher creates a new Hill cipher with the given key matrix.
 
 The key matrix must be square and invertible modulo 26. The function computes the inverse
@@ -61,7 +108,7 @@ to produce the inverse modulo 26.
 
 Returns an error if the key matrix is not square or not invertible.
 */
-func NewHillCipher(keyMatrix [][]int) (*HillCipher, error) {
+func NewHillCipher(key *HillKey) (*HillCipher, error) {
 	/*
 		Z26 is isomorphic to Z2 x Z13, so we can just compute
 		key inverse modulo 2 and key inverse modulo 13 and then
@@ -70,23 +117,23 @@ func NewHillCipher(keyMatrix [][]int) (*HillCipher, error) {
 		x = a + 2 * ((b - a) * 2^(-1) mod 13)
 		https://en.wikipedia.org/wiki/Chinese_remainder_theorem
 	*/
-	key, err := mathutils.NewMatrixFromData(keyMatrix)
+	keyMatrix, err := mathutils.NewMatrixFromData(key.Key)
 	if err != nil {
 		return nil, err
 	}
 
-	keyInverse2, err := mathutils.MatrixInverseModuloPrime(key, 2)
+	keyInverse2, err := mathutils.MatrixInverseModuloPrime(keyMatrix, 2)
 	if err != nil {
 		return nil, err
 	}
 
-	keyInverse13, err := mathutils.MatrixInverseModuloPrime(key, 13)
+	keyInverse13, err := mathutils.MatrixInverseModuloPrime(keyMatrix, 13)
 	if err != nil {
 		return nil, err
 	}
 
 	// size is checked when creating a matrix, so it's always > 0
-	size := key.Rows()
+	size := keyMatrix.Rows()
 	inverseKey, _ := mathutils.NewMatrixZero[int](size, size)
 
 	for i := range size {
@@ -96,7 +143,7 @@ func NewHillCipher(keyMatrix [][]int) (*HillCipher, error) {
 	}
 
 	return &HillCipher{
-		key:        key,
+		key:        keyMatrix,
 		inverseKey: inverseKey,
 	}, nil
 }

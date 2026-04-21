@@ -3,7 +3,7 @@ package mathutils
 import "fmt"
 
 type Matrix[T any] struct {
-	Data [][]T `json:"data,omitempty"`
+	Data [][]T
 }
 
 func NewMatrixZero[T any](rows int, columns int) (*Matrix[T], error) {
