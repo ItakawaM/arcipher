@@ -52,7 +52,7 @@ function applyToRotations(index: number, fn: (node: HTMLElement) => void): void 
 const params = new URLSearchParams(window.location.search)
 const nParam = params.get("n")
 
-document.querySelectorAll("#number").forEach(x => x.innerHTML = nParam ?? "")
+document.querySelectorAll("#number").forEach(x => x.textContent = nParam ?? "")
 
 const gridSize = Number(nParam)
 const required = (gridSize * gridSize - gridSize % 2) / 4
