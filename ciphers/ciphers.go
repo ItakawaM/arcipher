@@ -37,6 +37,20 @@ func IsASCIILetter(char byte) bool {
 }
 
 /*
+IsUpperASCIILetter checks whether the provided char is an ASCII A-Z letter.
+*/
+func IsUpperASCIILetter(char byte) bool {
+	return (char >= 'A' && char <= 'Z')
+}
+
+/*
+IsLowerASCIILetter checks whether the provided char is an ASCII a-z letter.
+*/
+func IsLowerASCIILetter(char byte) bool {
+	return (char >= 'a' && char <= 'z')
+}
+
+/*
 ToASCIILetter converts an ASCII letter to its position in the alphabet (0-25).
 
 For lowercase letters (a-z), it returns 0-25.
