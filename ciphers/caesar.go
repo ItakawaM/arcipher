@@ -34,7 +34,7 @@ CarsarKey represents a key for Caesar cipher.
 It consists of a byte shift.
 */
 type CaesarKey struct {
-	Key int
+	Key int `json:"key"`
 }
 
 /*

@@ -31,8 +31,8 @@ It contains the height of the fence (Key)
 and the length of the permutation block (PermutationLength).
 */
 type RailFenceKey struct {
-	Key               int
-	PermutationLength int
+	Key               int `json:"keyy"`
+	PermutationLength int `json:"permutation_length"`
 }
 
 /*
