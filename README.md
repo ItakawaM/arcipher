@@ -12,7 +12,7 @@ A Go library and CLI tool for classical cryptography and cryptanalysis. Provides
 
 **CLI**: `arcipher` command-line tool for encrypting, decrypting, and analyzing text and files with support for concurrent block processing.
 
-### Supported Ciphers
+### Ciphers
 
 | Cipher Name        | Cipher Type                 | Variant       |
 |--------------------|-----------------------------|---------------|
@@ -20,6 +20,24 @@ A Go library and CLI tool for classical cryptography and cryptanalysis. Provides
 | Caesar             | Substitution                | —             |
 | Cardan             | Hole Permutation            | —             |
 | Vigenere           | Polyalphabetic Substitution | Autokey (-a)  |
+| Affine             | Polygraphic Substituion     | Hill          |
+
+### Analyzers
+
+| Analyzer Name                     | Ciphers              |
+|-----------------------------------|----------------------|
+| Frequency Analysis                | Caesar               |
+| Kasiski Test & Frequency Analysis | Vigenere             |
+
+### Padding
+
+| Padding Scheme |
+|----------------|
+| ISOIEC7816     |
+
+### Math Utilities
+
+Matrix operations and modular arithmetic utilities for classical cipher implementations.
 
 ## Installation
 
@@ -229,6 +247,29 @@ arcipher vigenere decrypt "Secret" "zincspvvwo" -a
 ```bash
 arcipher vigenere encrypt "Keyword" ./example/SunPoem ./example/SunPoem.enc --block 512 --threads 4 -a
 arcipher vigenere decrypt "Keyword" ./example/SunPoem.enc ./example/SunPoem --block 512 --threads 4 -a
+```
+
+### Affine
+
+#### Generate an Affine cipher key
+
+```bash
+arcipher affine generate-key 3 key.json
+arcipher affine generate-key 25 key.json --template
+```
+
+#### Message Encryption/Decryption with key
+
+```bash
+arcipher affine encrypt ./key.json "HELLOWORLD"
+arcipher affine decrypt ./key.json "ZICVTWQNGRZGVTWAVZHCQYGLMGJ"
+```
+
+#### File Encryption/Decryption with key and 4 threads
+
+```bash
+arcipher affine encrypt key.json ./example/input ./example/input.enc --threads 4 -v
+arcipher affine decrypt key.json ./example/input.enc ./example/output --threads 4 -v
 ```
 
 ## Options
